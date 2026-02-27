@@ -11,7 +11,10 @@ linters:
     - gosimple
     - ineffassign
     - misspell
-    - gofmt
   exclusions:
     paths:
       - docs
+
+formatters:
+  enable:
+    - gofmt
