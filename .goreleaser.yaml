@@ -1,0 +1,69 @@
+version: 2
+
+builds:
+  - main: ./cmd/qbo
+    binary: qbo
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^chore:"
+      - "^ci:"
+
+brews:
+  - name: qbo
+    homepage: "https://github.com/voska/qbo-cli"
+    description: "QuickBooks Online CLI for humans and AI agents"
+    license: "MIT"
+    repository:
+      owner: voska
+      name: homebrew-tap
+    commit_author:
+      name: voska-bot
+      email: bot@voska.dev
+    install: |
+      bin.install "qbo"
+    test: |
+      assert_match version.to_s, shell_output("#{bin}/qbo exit-codes --json")
+
+scoops:
+  - name: qbo
+    homepage: "https://github.com/voska/qbo-cli"
+    description: "QuickBooks Online CLI for humans and AI agents"
+    license: "MIT"
+    repository:
+      owner: voska
+      name: scoop-bucket
+
+nfpms:
+  - package_name: qbo
+    homepage: "https://github.com/voska/qbo-cli"
+    maintainer: "voska <hello@voska.dev>"
+    description: "QuickBooks Online CLI for humans and AI agents"
+    license: "MIT"
+    formats:
+      - deb
+      - rpm
