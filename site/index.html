@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>qbo — QuickBooks Online CLI for Humans and AI Agents</title>
+  <meta name="description" content="qbo is an open-source command-line interface for QuickBooks Online. Query invoices, customers, and financial reports from your terminal. Structured JSON output for AI agents and automation.">
+  <meta name="keywords" content="QuickBooks CLI, QuickBooks Online API, QBO command line, accounting CLI, invoice automation, AI agent tools, financial reports terminal">
+  <link rel="canonical" href="https://voska.github.io/qbo-cli/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="qbo — QuickBooks Online CLI">
+  <meta property="og:description" content="Query invoices, customers, and financial reports from your terminal. Built for humans and AI agents.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://voska.github.io/qbo-cli/">
+  <meta property="og:site_name" content="qbo CLI">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="qbo — QuickBooks Online CLI">
+  <meta name="twitter:description" content="Query invoices, customers, and financial reports from your terminal. Built for humans and AI agents.">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>></text></svg>">
+
+  <!-- LLMs -->
+  <link rel="llms" href="/qbo-cli/llms.txt" type="text/plain">
+
+  <!-- JSON-LD: SoftwareApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "qbo",
+    "alternateName": "qbo CLI",
+    "description": "An open-source command-line interface for QuickBooks Online. qbo lets you query invoices, customers, vendors, and financial reports directly from your terminal. It outputs structured JSON for AI agents, colored tables for humans, and tab-separated values for shell pipelines.",
+    "applicationCategory": "DeveloperApplication",
+    "applicationSubCategory": "Command Line Tool",
+    "operatingSystem": "macOS, Linux, Windows",
+    "softwareVersion": "0.1.0",
+    "releaseNotes": "Initial release with full QuickBooks Online API coverage",
+    "license": "https://opensource.org/licenses/MIT",
+    "url": "https://voska.github.io/qbo-cli/",
+    "downloadUrl": "https://github.com/voska/qbo-cli/releases",
+    "installUrl": "https://github.com/voska/qbo-cli#install",
+    "codeRepository": "https://github.com/voska/qbo-cli",
+    "programmingLanguage": "Go",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "voska",
+      "url": "https://github.com/voska"
+    },
+    "featureList": [
+      "Three output modes: JSON, colored tables, tab-separated values",
+      "OAuth 2.0 authentication with secure keyring storage",
+      "AI agent mode with structured exit codes and JSON schema introspection",
+      "Financial reports: Profit & Loss, Balance Sheet, and more",
+      "Raw SQL-like queries against QuickBooks Online entities",
+      "Batch operations and change data capture",
+      "Field projection with --select for precise output",
+      "Dry-run mode for safe mutation previews",
+      "Multi-company support with profiles"
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage for GEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is qbo CLI?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "qbo is a free, open-source command-line interface for QuickBooks Online. It lets you query invoices, customers, vendors, and financial reports directly from your terminal. It supports three output modes: structured JSON for automation and AI agents, colored tables for interactive use, and tab-separated values for shell pipelines."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I install qbo CLI?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "On macOS or Linux, install via Homebrew: brew install voska/tap/qbo. On Windows, use Scoop: scoop bucket add voska https://github.com/voska/scoop-bucket && scoop install qbo. You can also install with Go: go install github.com/voska/qbo-cli/cmd/qbo@latest, or download binaries from GitHub Releases."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use qbo with AI agents like Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. qbo is designed for both humans and AI agents. It provides structured JSON output via --json, machine-readable exit codes (0-10), a --no-input flag for non-interactive use, and a schema command that outputs the full CLI structure as JSON for agent introspection. Install as a Claude Code skill with: npx skills add -g voska/qbo-cli."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What QuickBooks Online data can I access with qbo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "qbo provides full coverage of the QuickBooks Online API. You can list, get, create, update, and delete entities including invoices, customers, vendors, items, payments, bills, and more. You can run financial reports like Profit & Loss and Balance Sheet, execute raw SQL-like queries, perform batch operations, and use change data capture for syncing."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            mono: ['ui-monospace', 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono', 'monospace'],
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50:  '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+              950: '#022c22',
+            },
+            surface: {
+              bg:     '#09090b',
+              card:   '#111114',
+              raised: '#18181b',
+              border: '#27272a',
+              hover:  '#2e2e33',
+            },
+            muted: '#a1a1aa',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #09090b;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    /* Animated gradient for hero */
+    .hero-gradient {
+      background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.15), transparent);
+    }
+
+    /* Terminal styling */
+    .terminal {
+      background: #111114;
+      border: 1px solid #27272a;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .terminal-bar {
+      background: #18181b;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #27272a;
+    }
+    .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+    /* Syntax colors */
+    .syn-prompt { color: #10b981; }
+    .syn-cmd { color: #e4e4e7; }
+    .syn-flag { color: #a78bfa; }
+    .syn-str { color: #67e8f9; }
+    .syn-num { color: #fbbf24; }
+    .syn-dim { color: #71717a; }
+    .syn-key { color: #fb923c; }
+
+    /* Tab button active state */
+    .tab-btn.active {
+      background: #27272a;
+      color: #e4e4e7;
+    }
+
+    /* Reveal animation base state */
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    [data-reveal].revealed {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    [data-reveal-delay="1"].revealed { transition-delay: 0.1s; }
+    [data-reveal-delay="2"].revealed { transition-delay: 0.2s; }
+    [data-reveal-delay="3"].revealed { transition-delay: 0.3s; }
+    [data-reveal-delay="4"].revealed { transition-delay: 0.4s; }
+
+    /* Card hover glow */
+    .card-glow {
+      position: relative;
+      transition: border-color 0.3s, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-glow:hover {
+      border-color: rgba(16, 185, 129, 0.3);
+      transform: translateY(-2px);
+    }
+    .card-glow::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.06), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .card-glow:hover::before { opacity: 1; }
+
+    /* Copy button */
+    .copy-btn { transition: opacity 0.15s, color 0.15s; }
+    .copy-btn:hover { opacity: 1 !important; color: #e4e4e7; }
+
+    /* Nav blur */
+    .nav-blur {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: rgba(9, 9, 11, 0.8);
+    }
+
+    /* Glow pill for version badge */
+    .version-pill {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    /* Gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, #10b981 0%, #34d399 50%, #6ee7b7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Typing cursor blink */
+    .cursor-blink::after {
+      content: '|';
+      animation: blink 1s step-end infinite;
+      color: #10b981;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body class="text-zinc-200 antialiased">
+
+  <!-- Nav -->
+  <nav class="fixed top-0 inset-x-0 z-50 nav-blur border-b border-surface-border">
+    <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+      <a href="#" class="text-lg font-bold font-mono tracking-tight">qbo</a>
+      <div class="flex items-center gap-5 text-sm">
+        <a href="#features" class="text-muted hover:text-zinc-200 transition-colors hidden sm:block">Features</a>
+        <a href="#install" class="text-muted hover:text-zinc-200 transition-colors hidden sm:block">Install</a>
+        <a href="#quickstart" class="text-muted hover:text-zinc-200 transition-colors hidden sm:block">Quick Start</a>
+        <a href="#faq" class="text-muted hover:text-zinc-200 transition-colors hidden sm:block">FAQ</a>
+        <a href="https://github.com/voska/qbo-cli" class="text-muted hover:text-zinc-200 transition-colors flex items-center gap-1.5">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
+          <span class="hidden sm:inline">GitHub</span>
+        </a>
+        <span class="version-pill px-2.5 py-0.5 rounded-full text-xs font-mono text-brand-400">v0.1.0</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero-gradient pt-28 pb-20 sm:pt-36 sm:pb-28">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <div data-reveal>
+        <p class="text-brand-400 font-mono text-sm font-medium tracking-wide uppercase mb-4">Open Source CLI</p>
+      </div>
+      <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6" data-reveal data-reveal-delay="1">
+        <span class="gradient-text">QuickBooks Online</span><br>
+        <span class="text-zinc-100">from your terminal</span>
+      </h1>
+      <p class="text-lg sm:text-xl text-muted max-w-2xl mx-auto mb-10 leading-relaxed" data-reveal data-reveal-delay="2">
+        Query invoices, manage customers, run financial reports. Structured output for AI agents, colored tables for humans, TSV for pipelines.
+      </p>
+
+      <!-- Hero install command -->
+      <div class="inline-block mb-10" data-reveal data-reveal-delay="3">
+        <div class="terminal inline-block">
+          <div class="px-5 py-3 flex items-center gap-4">
+            <code class="font-mono text-sm sm:text-base">
+              <span class="syn-prompt">$</span> <span class="syn-cmd">brew install</span> <span class="syn-str">voska/tap/qbo</span>
+            </code>
+            <button onclick="copyText('brew install voska/tap/qbo', this)" class="copy-btn opacity-40 text-muted flex-shrink-0" title="Copy to clipboard" aria-label="Copy install command">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center gap-4" data-reveal data-reveal-delay="4">
+        <a href="https://github.com/voska/qbo-cli" class="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-raised border border-surface-border rounded-lg text-sm font-medium hover:border-surface-hover hover:bg-surface-hover transition-all">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
+          View on GitHub
+        </a>
+        <a href="#install" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors">
+          Get Started
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Terminal Demo -->
+  <section class="max-w-6xl mx-auto px-6 pb-24" aria-label="Terminal demo">
+    <div class="terminal" data-reveal>
+      <div class="terminal-bar">
+        <div class="terminal-dot" style="background:#f85149;"></div>
+        <div class="terminal-dot" style="background:#fbbf24;"></div>
+        <div class="terminal-dot" style="background:#10b981;"></div>
+        <span class="text-xs text-muted ml-2 font-mono">zsh</span>
+      </div>
+      <div class="p-6 font-mono text-sm leading-relaxed overflow-x-auto space-y-6">
+        <!-- List invoices -->
+        <div>
+          <div><span class="syn-prompt">$</span> <span class="syn-cmd">qbo list invoices</span> <span class="syn-flag">--where</span> <span class="syn-str">"Balance > '0'"</span> <span class="syn-flag">--select</span> <span class="syn-str">DocNumber,CustomerRef.name,Balance,DueDate</span></div>
+          <div class="mt-2">
+            <div class="grid gap-x-6 text-xs sm:text-sm" style="grid-template-columns: auto 1fr auto auto;">
+              <div class="font-bold text-zinc-300 border-b border-surface-border pb-1 mb-1">DOC #</div>
+              <div class="font-bold text-zinc-300 border-b border-surface-border pb-1 mb-1">CUSTOMER</div>
+              <div class="font-bold text-zinc-300 border-b border-surface-border pb-1 mb-1 text-right">BALANCE</div>
+              <div class="font-bold text-zinc-300 border-b border-surface-border pb-1 mb-1">DUE DATE</div>
+              <div class="syn-dim">1042</div><div class="syn-dim">Amy's Bird Sanctuary</div><div class="text-right syn-num">239.00</div><div class="syn-dim">2025-02-15</div>
+              <div class="syn-dim">1043</div><div class="syn-dim">Bill's Windsurf Shop</div><div class="text-right syn-num">85.00</div><div class="syn-dim">2025-02-20</div>
+              <div class="syn-dim">1044</div><div class="syn-dim">Cool Cars</div><div class="text-right syn-num">4,620.00</div><div class="syn-dim">2025-03-01</div>
+              <div class="syn-dim">1045</div><div class="syn-dim">Diego's Road Warrior</div><div class="text-right syn-num">1,250.50</div><div class="syn-dim">2025-03-05</div>
+            </div>
+            <div class="mt-2 text-xs syn-dim">4 invoices &middot; page 1/1</div>
+          </div>
+        </div>
+
+        <!-- JSON pipe -->
+        <div>
+          <div><span class="syn-prompt">$</span> <span class="syn-cmd">qbo get customer</span> <span class="syn-num">58</span> <span class="syn-flag">--json</span> <span class="syn-dim">| jq '.DisplayName, .Balance'</span></div>
+          <div class="mt-2">
+            <div><span class="syn-str">"Amy's Bird Sanctuary"</span></div>
+            <div><span class="syn-num">239.00</span></div>
+          </div>
+        </div>
+
+        <!-- Query -->
+        <div>
+          <div><span class="syn-prompt">$</span> <span class="syn-cmd">qbo query</span> <span class="syn-str">"SELECT COUNT(*) FROM Invoice WHERE TxnDate >= '2025-01-01'"</span> <span class="syn-flag">--json</span></div>
+          <div class="mt-2">
+            <div><span class="syn-dim">{</span> <span class="syn-key">"totalCount"</span><span class="syn-dim">:</span> <span class="syn-num">47</span> <span class="syn-dim">}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="max-w-6xl mx-auto px-6 pb-24" aria-label="Features">
+    <h2 class="text-3xl font-bold text-center mb-4" data-reveal>Built for the way you work</h2>
+    <p class="text-muted text-center mb-12 max-w-xl mx-auto" data-reveal data-reveal-delay="1">Three output modes, structured exit codes, and full API coverage. Whether you're in a terminal or building an agent.</p>
+
+    <div class="grid md:grid-cols-3 gap-5">
+      <article class="terminal card-glow p-6" data-reveal>
+        <div class="w-10 h-10 rounded-lg bg-brand-950 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">JSON / Table / TSV</h3>
+        <p class="text-muted text-sm leading-relaxed"><code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">--json</code> for machines, colored tables for humans, <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">--plain</code> for pipelines. Auto-detects when stdout is piped.</p>
+      </article>
+
+      <article class="terminal card-glow p-6" data-reveal data-reveal-delay="1">
+        <div class="w-10 h-10 rounded-lg bg-brand-950 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 6H8l4 6 4-6h-2c0-3 2-4 2-6a4 4 0 0 0-4-4Z"/><path d="M12 18v4"/></svg>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">Agent-Ready</h3>
+        <p class="text-muted text-sm leading-relaxed">Structured exit codes, <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">--no-input</code> mode, and <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">qbo schema</code> for JSON introspection. Built for Claude Code and LLM automation.</p>
+      </article>
+
+      <article class="terminal card-glow p-6" data-reveal data-reveal-delay="2">
+        <div class="w-10 h-10 rounded-lg bg-brand-950 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">Reports & Queries</h3>
+        <p class="text-muted text-sm leading-relaxed">Profit & Loss, Balance Sheet, raw SQL-like queries, batch operations, and change data capture. Full QuickBooks Online API coverage.</p>
+      </article>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5 mt-5">
+      <article class="terminal card-glow p-6" data-reveal>
+        <div class="w-10 h-10 rounded-lg bg-brand-950 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">Secure OAuth 2.0</h3>
+        <p class="text-muted text-sm leading-relaxed">Browser-based OAuth flow with tokens stored in your system keyring. No credentials in config files.</p>
+      </article>
+
+      <article class="terminal card-glow p-6" data-reveal data-reveal-delay="1">
+        <div class="w-10 h-10 rounded-lg bg-brand-950 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">Multi-Company</h3>
+        <p class="text-muted text-sm leading-relaxed">Switch between multiple QuickBooks companies with named profiles. <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">--company-id</code> flag or <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">qbo company switch</code>.</p>
+      </article>
+
+      <article class="terminal card-glow p-6" data-reveal data-reveal-delay="2">
+        <div class="w-10 h-10 rounded-lg bg-brand-950 flex items-center justify-center mb-4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <h3 class="font-semibold text-lg mb-2">Cross-Platform</h3>
+        <p class="text-muted text-sm leading-relaxed">Pure Go binary. Install via Homebrew, Scoop, <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">go install</code>, or download from GitHub Releases. No dependencies.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Install -->
+  <section id="install" class="max-w-6xl mx-auto px-6 pb-24" aria-label="Installation">
+    <h2 class="text-3xl font-bold text-center mb-4" data-reveal>Install</h2>
+    <p class="text-muted text-center mb-10" data-reveal data-reveal-delay="1">One command. No dependencies.</p>
+
+    <div class="terminal max-w-3xl mx-auto" data-reveal data-reveal-delay="2">
+      <div class="flex border-b border-surface-border overflow-x-auto" role="tablist" aria-label="Installation methods">
+        <button onclick="switchTab('homebrew')" class="tab-btn active px-5 py-3 text-sm font-mono text-muted hover:text-zinc-200 transition-colors flex-shrink-0" data-tab="homebrew" role="tab" aria-selected="true" aria-controls="tab-homebrew">Homebrew</button>
+        <button onclick="switchTab('scoop')" class="tab-btn px-5 py-3 text-sm font-mono text-muted hover:text-zinc-200 transition-colors flex-shrink-0" data-tab="scoop" role="tab" aria-selected="false" aria-controls="tab-scoop">Scoop</button>
+        <button onclick="switchTab('go')" class="tab-btn px-5 py-3 text-sm font-mono text-muted hover:text-zinc-200 transition-colors flex-shrink-0" data-tab="go" role="tab" aria-selected="false" aria-controls="tab-go">Go</button>
+        <button onclick="switchTab('binary')" class="tab-btn px-5 py-3 text-sm font-mono text-muted hover:text-zinc-200 transition-colors flex-shrink-0" data-tab="binary" role="tab" aria-selected="false" aria-controls="tab-binary">Binary</button>
+        <button onclick="switchTab('deb')" class="tab-btn px-5 py-3 text-sm font-mono text-muted hover:text-zinc-200 transition-colors flex-shrink-0" data-tab="deb" role="tab" aria-selected="false" aria-controls="tab-deb">deb</button>
+      </div>
+
+      <div class="p-6">
+        <div id="tab-homebrew" class="tab-content" role="tabpanel">
+          <div class="flex items-start justify-between gap-4">
+            <pre class="font-mono text-sm"><span class="syn-prompt">$</span> <span class="syn-cmd">brew install voska/tap/qbo</span></pre>
+            <button onclick="copyText('brew install voska/tap/qbo', this)" class="copy-btn opacity-40 text-muted flex-shrink-0" title="Copy" aria-label="Copy Homebrew install command">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+            </button>
+          </div>
+          <p class="text-muted text-xs mt-3">macOS and Linux</p>
+        </div>
+
+        <div id="tab-scoop" class="tab-content hidden" role="tabpanel">
+          <div class="flex items-start justify-between gap-4">
+            <pre class="font-mono text-sm"><span class="syn-prompt">&gt;</span> <span class="syn-cmd">scoop bucket add voska https://github.com/voska/scoop-bucket</span>
+<span class="syn-prompt">&gt;</span> <span class="syn-cmd">scoop install qbo</span></pre>
+            <button onclick="copyText('scoop bucket add voska https://github.com/voska/scoop-bucket\nscoop install qbo', this)" class="copy-btn opacity-40 text-muted flex-shrink-0" title="Copy" aria-label="Copy Scoop install commands">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+            </button>
+          </div>
+          <p class="text-muted text-xs mt-3">Windows</p>
+        </div>
+
+        <div id="tab-go" class="tab-content hidden" role="tabpanel">
+          <div class="flex items-start justify-between gap-4">
+            <pre class="font-mono text-sm"><span class="syn-prompt">$</span> <span class="syn-cmd">go install github.com/voska/qbo-cli/cmd/qbo@latest</span></pre>
+            <button onclick="copyText('go install github.com/voska/qbo-cli/cmd/qbo@latest', this)" class="copy-btn opacity-40 text-muted flex-shrink-0" title="Copy" aria-label="Copy Go install command">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+            </button>
+          </div>
+          <p class="text-muted text-xs mt-3">Requires Go 1.22+</p>
+        </div>
+
+        <div id="tab-binary" class="tab-content hidden" role="tabpanel">
+          <p class="text-sm mb-3">Download the latest binary from <a href="https://github.com/voska/qbo-cli/releases" class="text-brand-400 hover:underline">GitHub Releases</a>.</p>
+          <pre class="font-mono text-sm"><span class="syn-prompt">$</span> <span class="syn-cmd">tar xzf qbo_darwin_arm64.tar.gz</span>
+<span class="syn-prompt">$</span> <span class="syn-cmd">mv qbo /usr/local/bin/</span></pre>
+        </div>
+
+        <div id="tab-deb" class="tab-content hidden" role="tabpanel">
+          <div class="flex items-start justify-between gap-4">
+            <pre class="font-mono text-sm"><span class="syn-prompt">$</span> <span class="syn-cmd">curl -LO https://github.com/voska/qbo-cli/releases/latest/download/qbo_linux_amd64.deb</span>
+<span class="syn-prompt">$</span> <span class="syn-cmd">sudo dpkg -i qbo_linux_amd64.deb</span></pre>
+            <button onclick="copyText('curl -LO https://github.com/voska/qbo-cli/releases/latest/download/qbo_linux_amd64.deb\nsudo dpkg -i qbo_linux_amd64.deb', this)" class="copy-btn opacity-40 text-muted flex-shrink-0" title="Copy" aria-label="Copy deb install commands">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+            </button>
+          </div>
+          <p class="text-muted text-xs mt-3">Debian / Ubuntu</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start -->
+  <section id="quickstart" class="max-w-6xl mx-auto px-6 pb-24" aria-label="Quick start guide">
+    <h2 class="text-3xl font-bold text-center mb-4" data-reveal>Quick Start</h2>
+    <p class="text-muted text-center mb-10" data-reveal data-reveal-delay="1">From install to your first query in under a minute.</p>
+
+    <div class="max-w-3xl mx-auto space-y-4">
+      <div class="terminal card-glow" data-reveal>
+        <div class="flex items-center gap-3 px-6 pt-5 pb-2">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-600 text-white text-xs font-bold flex-shrink-0">1</span>
+          <span class="text-sm font-medium">Authenticate with QuickBooks Online</span>
+        </div>
+        <div class="px-6 pb-5">
+          <pre class="font-mono text-sm mt-2"><span class="syn-prompt">$</span> <span class="syn-cmd">qbo auth login</span>
+<span class="syn-dim">Opening browser for OAuth...</span>
+<span class="text-brand-400">Authenticated as Acme Corp (company 1234567890)</span></pre>
+        </div>
+      </div>
+
+      <div class="terminal card-glow" data-reveal data-reveal-delay="1">
+        <div class="flex items-center gap-3 px-6 pt-5 pb-2">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-600 text-white text-xs font-bold flex-shrink-0">2</span>
+          <span class="text-sm font-medium">List entities</span>
+        </div>
+        <div class="px-6 pb-5">
+          <pre class="font-mono text-sm mt-2"><span class="syn-prompt">$</span> <span class="syn-cmd">qbo list customers</span> <span class="syn-flag">--select</span> <span class="syn-str">DisplayName,Balance</span>
+<span class="syn-dim">DISPLAY NAME              BALANCE
+Amy's Bird Sanctuary      239.00
+Bill's Windsurf Shop       85.00
+Cool Cars               4,620.00
+3 customers found</span></pre>
+        </div>
+      </div>
+
+      <div class="terminal card-glow" data-reveal data-reveal-delay="2">
+        <div class="flex items-center gap-3 px-6 pt-5 pb-2">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-600 text-white text-xs font-bold flex-shrink-0">3</span>
+          <span class="text-sm font-medium">Query with filters and pipe to JSON</span>
+        </div>
+        <div class="px-6 pb-5">
+          <pre class="font-mono text-sm mt-2"><span class="syn-prompt">$</span> <span class="syn-cmd">qbo list invoices</span> <span class="syn-flag">--where</span> <span class="syn-str">"Balance > '0'"</span> <span class="syn-flag">--json</span> <span class="syn-dim">| jq length</span>
+<span class="syn-num">12</span></pre>
+        </div>
+      </div>
+
+      <div class="terminal card-glow" data-reveal data-reveal-delay="3">
+        <div class="flex items-center gap-3 px-6 pt-5 pb-2">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-600 text-white text-xs font-bold flex-shrink-0">4</span>
+          <span class="text-sm font-medium">Run financial reports</span>
+        </div>
+        <div class="px-6 pb-5">
+          <pre class="font-mono text-sm mt-2"><span class="syn-prompt">$</span> <span class="syn-cmd">qbo report profit-and-loss</span> <span class="syn-flag">--start-date</span> <span class="syn-str">2025-01-01</span> <span class="syn-flag">--end-date</span> <span class="syn-str">2025-12-31</span> <span class="syn-flag">--json</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ (GEO-optimized) -->
+  <section id="faq" class="max-w-6xl mx-auto px-6 pb-24" aria-label="Frequently asked questions">
+    <h2 class="text-3xl font-bold text-center mb-10" data-reveal>FAQ</h2>
+
+    <div class="max-w-3xl mx-auto space-y-6">
+      <details class="terminal group" data-reveal>
+        <summary class="px-6 py-4 cursor-pointer flex items-center justify-between hover:bg-surface-raised transition-colors rounded-xl">
+          <span class="font-medium">What is qbo CLI?</span>
+          <svg class="w-5 h-5 text-muted transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="px-6 pb-5 text-muted text-sm leading-relaxed">
+          qbo is a free, open-source command-line interface for QuickBooks Online. It lets you query invoices, customers, vendors, and financial reports directly from your terminal. It supports three output modes: structured JSON for automation and AI agents, colored tables for interactive use, and tab-separated values for shell pipelines. Written in Go with zero runtime dependencies.
+        </div>
+      </details>
+
+      <details class="terminal group" data-reveal data-reveal-delay="1">
+        <summary class="px-6 py-4 cursor-pointer flex items-center justify-between hover:bg-surface-raised transition-colors rounded-xl">
+          <span class="font-medium">How do I install qbo?</span>
+          <svg class="w-5 h-5 text-muted transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="px-6 pb-5 text-muted text-sm leading-relaxed">
+          On macOS or Linux: <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">brew install voska/tap/qbo</code>. On Windows: <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">scoop bucket add voska https://github.com/voska/scoop-bucket && scoop install qbo</code>. With Go: <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">go install github.com/voska/qbo-cli/cmd/qbo@latest</code>. Or download binaries directly from <a href="https://github.com/voska/qbo-cli/releases" class="text-brand-400 hover:underline">GitHub Releases</a>.
+        </div>
+      </details>
+
+      <details class="terminal group" data-reveal data-reveal-delay="2">
+        <summary class="px-6 py-4 cursor-pointer flex items-center justify-between hover:bg-surface-raised transition-colors rounded-xl">
+          <span class="font-medium">Can I use qbo with AI agents?</span>
+          <svg class="w-5 h-5 text-muted transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="px-6 pb-5 text-muted text-sm leading-relaxed">
+          Yes. qbo is designed for both humans and AI agents. It provides structured JSON output via <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">--json</code>, machine-readable exit codes (0-10), a <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">--no-input</code> flag for non-interactive use, and a <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">qbo schema</code> command that outputs the full CLI structure as JSON for agent introspection. Install as a Claude Code skill with: <code class="text-zinc-300 bg-surface-raised px-1.5 py-0.5 rounded text-xs">npx skills add -g voska/qbo-cli</code>.
+        </div>
+      </details>
+
+      <details class="terminal group" data-reveal data-reveal-delay="3">
+        <summary class="px-6 py-4 cursor-pointer flex items-center justify-between hover:bg-surface-raised transition-colors rounded-xl">
+          <span class="font-medium">What QuickBooks data can I access?</span>
+          <svg class="w-5 h-5 text-muted transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="px-6 pb-5 text-muted text-sm leading-relaxed">
+          Full coverage of the QuickBooks Online API. List, get, create, update, and delete entities including invoices, customers, vendors, items, payments, bills, and more. Run financial reports (Profit & Loss, Balance Sheet), execute raw SQL-like queries, perform batch operations, and use change data capture for incremental syncing.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-surface-border">
+    <div class="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted">
+      <div class="flex items-center gap-2">
+        <span class="font-mono font-bold text-zinc-300">qbo</span>
+        <span>&middot;</span>
+        <span>MIT License</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="https://github.com/voska/qbo-cli" class="hover:text-zinc-200 transition-colors">GitHub</a>
+        <a href="https://github.com/voska" class="hover:text-zinc-200 transition-colors">@voska</a>
+        <a href="/qbo-cli/llms.txt" class="hover:text-zinc-200 transition-colors font-mono text-xs">llms.txt</a>
+      </div>
+    </div>
+    <div class="max-w-6xl mx-auto px-6 pb-8 text-xs text-zinc-500 text-center">
+      qbo is an independent open-source project. Not affiliated with, endorsed by, or sponsored by Intuit Inc. QuickBooks and QuickBooks Online are trademarks of Intuit Inc.
+    </div>
+  </footer>
+
+  <!-- Motion (Framer Motion) via CDN -->
+  <script type="module">
+    import { animate, inView, stagger } from 'https://cdn.jsdelivr.net/npm/motion@11/+esm';
+
+    // Scroll-triggered reveal animations
+    document.querySelectorAll('[data-reveal]').forEach(el => {
+      inView(el, () => {
+        el.classList.add('revealed');
+      }, { margin: '-60px' });
+    });
+
+    // Animate hero elements on load
+    const heroElements = document.querySelectorAll('.hero-gradient [data-reveal]');
+    heroElements.forEach(el => el.classList.add('revealed'));
+
+    // Micro-interaction: nav background on scroll
+    const nav = document.querySelector('nav');
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+      const scrolled = window.scrollY > 20;
+      nav.style.borderBottomColor = scrolled ? 'rgba(39,39,42,1)' : 'rgba(39,39,42,0.5)';
+    }, { passive: true });
+
+    // Animate terminal typing effect on first terminal in view
+    const terminalDemo = document.querySelector('[aria-label="Terminal demo"] .terminal');
+    if (terminalDemo) {
+      inView(terminalDemo, () => {
+        const lines = terminalDemo.querySelectorAll('.space-y-6 > div');
+        lines.forEach((line, i) => {
+          animate(line, { opacity: [0, 1], y: [10, 0] }, {
+            delay: i * 0.15,
+            duration: 0.5,
+            easing: [0.16, 1, 0.3, 1]
+          });
+        });
+      }, { margin: '-40px' });
+    }
+
+    // Stagger feature cards
+    const featureGrids = document.querySelectorAll('#features .grid');
+    featureGrids.forEach(grid => {
+      inView(grid, () => {
+        const cards = grid.querySelectorAll('article');
+        animate(cards, { opacity: [0, 1], y: [20, 0] }, {
+          delay: stagger(0.1),
+          duration: 0.5,
+          easing: [0.16, 1, 0.3, 1]
+        });
+      }, { margin: '-40px' });
+    });
+  </script>
+
+  <!-- Tab switcher + copy -->
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('active');
+        el.setAttribute('aria-selected', 'false');
+      });
+      const panel = document.getElementById('tab-' + tab);
+      panel.classList.remove('hidden');
+      const btn = document.querySelector('[data-tab="' + tab + '"]');
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+    }
+
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.innerHTML;
+        btn.innerHTML = '<span class="text-brand-400 text-xs font-mono font-medium">Copied!</span>';
+        setTimeout(() => { btn.innerHTML = original; }, 1500);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+# qbo — QuickBooks Online CLI
+
+> CLI for QuickBooks Online. For humans and AI agents.
+
+qbo is a free, open-source command-line interface for QuickBooks Online written in Go. It provides full API coverage for querying and managing QuickBooks Online data from the terminal.
+
+## Install
+
+- Homebrew (macOS/Linux): `brew install voska/tap/qbo`
+- Scoop (Windows): `scoop bucket add voska https://github.com/voska/scoop-bucket && scoop install qbo`
+- Go: `go install github.com/voska/qbo-cli/cmd/qbo@latest`
+- Binary: https://github.com/voska/qbo-cli/releases
+
+## Output Modes
+
+- Default: colored tables with summaries on stderr
+- `--json` / `-j`: structured JSON to stdout (auto-enabled when piped with QBO_AUTO_JSON=1)
+- `--plain` / `-p`: tab-separated values, no color
+- `--results-only`: strip pagination metadata, return data array only
+- `--select field1,field2`: project output to specific fields (dot paths supported)
+
+## Commands
+
+- `qbo auth login|logout|status|refresh` — OAuth 2.0 authentication
+- `qbo list <entity>` — List entities with optional filters (--where, --orderby, --limit)
+- `qbo get <entity> <id>` — Read a single entity by ID
+- `qbo create <entity>` — Create from JSON file or stdin
+- `qbo update <entity> <id>` — Update (full or --sparse)
+- `qbo delete <entity> <id>` — Delete with confirmation (--force to skip)
+- `qbo query "<sql>"` — Raw QuickBooks query language
+- `qbo batch --file` — Batch operations from JSON file
+- `qbo cdc --entities --since` — Change data capture
+- `qbo report <type>` — Financial reports (profit-and-loss, balance-sheet, etc.)
+- `qbo company info|list|switch` — Company management
+- `qbo schema` — CLI schema as JSON for agent introspection
+- `qbo exit-codes` — Exit code reference
+
+## Exit Codes
+
+- 0: success
+- 1: error
+- 2: usage (invalid arguments)
+- 3: empty (no results)
+- 4: auth_required
+- 5: not_found
+- 6: forbidden
+- 7: rate_limited
+- 8: retryable (transient error)
+- 10: config_error
+
+## Agent Integration
+
+qbo is designed for AI agent use:
+- Structured JSON output via --json
+- Machine-readable exit codes (0-10)
+- --no-input flag for non-interactive use
+- `qbo schema` outputs full CLI structure as JSON
+- Install as Claude Code skill: `npx skills add -g voska/qbo-cli`
+
+## Key Flags
+
+- `--company-id` / `QBO_COMPANY_ID`: target company
+- `--sandbox`: target QBO sandbox environment
+- `--dry-run` / `-n`: show what would happen without making API calls
+- `--no-input`: never prompt, fail if confirmation needed
+- `--force` / `--yes`: skip confirmations
+
+## Links
+
+- Source: https://github.com/voska/qbo-cli
+- Releases: https://github.com/voska/qbo-cli/releases
+- License: MIT
