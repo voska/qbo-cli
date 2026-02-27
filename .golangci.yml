@@ -12,7 +12,6 @@ linters:
     - ineffassign
     - misspell
     - gofmt
-
-issues:
-  exclude-dirs:
-    - docs
+  exclusions:
+    paths:
+      - docs
