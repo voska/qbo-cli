@@ -21,7 +21,8 @@
   <meta name="twitter:description" content="Query invoices, customers, and financial reports from your terminal. Built for humans and AI agents.">
 
   <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>></text></svg>">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2309090b'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='16' font-weight='700' fill='%2310b981'>qbo</text></svg>">
 
   <!-- LLMs -->
   <link rel="llms" href="/qbo-cli/llms.txt" type="text/plain">
@@ -285,7 +286,7 @@
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
           <span class="hidden sm:inline">GitHub</span>
         </a>
-        <span class="version-pill px-2.5 py-0.5 rounded-full text-xs font-mono text-brand-400">v0.1.0</span>
+        <span class="version-pill px-2.5 py-0.5 rounded-full text-xs font-mono text-brand-400">v0.1.1</span>
       </div>
     </div>
   </nav>
@@ -304,28 +305,25 @@
         Query invoices, manage customers, run financial reports. Structured output for AI agents, colored tables for humans, TSV for pipelines.
       </p>
 
-      <!-- Hero install command -->
-      <div class="inline-block mb-10" data-reveal data-reveal-delay="3">
-        <div class="terminal inline-block">
-          <div class="px-5 py-3 flex items-center gap-4">
-            <code class="font-mono text-sm sm:text-base">
-              <span class="syn-prompt">$</span> <span class="syn-cmd">brew install</span> <span class="syn-str">voska/tap/qbo</span>
-            </code>
-            <button onclick="copyText('brew install voska/tap/qbo', this)" class="copy-btn opacity-40 text-muted flex-shrink-0" title="Copy to clipboard" aria-label="Copy install command">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
-            </button>
+      <!-- Hero agent copy-paste -->
+      <div class="max-w-2xl mx-auto mb-8" data-reveal data-reveal-delay="3">
+        <div class="terminal text-left mb-5">
+          <div class="px-5 py-4">
+            <pre class="font-mono text-sm whitespace-pre-wrap leading-relaxed"><span class="syn-cmd">Install the qbo CLI skill for QuickBooks Online access.</span>
+<span class="syn-dim">Run:</span> <span class="syn-str">npx skills add -g voska/qbo-cli</span></pre>
           </div>
         </div>
+        <button onclick="copyHeroPrompt(this)" class="inline-flex items-center justify-center gap-2.5 px-8 py-3.5 bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white rounded-lg text-base font-semibold transition-all shadow-lg shadow-brand-600/20 hover:shadow-brand-500/30" id="hero-copy-btn">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+          Copy Instructions
+        </button>
+        <p class="text-xs text-muted text-center mt-3">Copy and paste into OpenClaw, Claude Code, or any AI agent</p>
       </div>
 
       <div class="flex items-center justify-center gap-4" data-reveal data-reveal-delay="4">
-        <a href="https://github.com/voska/qbo-cli" class="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-raised border border-surface-border rounded-lg text-sm font-medium hover:border-surface-hover hover:bg-surface-hover transition-all">
+        <a href="https://github.com/voska/qbo-cli" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-muted hover:text-zinc-200 transition-colors">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
           View on GitHub
-        </a>
-        <a href="#install" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-sm font-semibold transition-colors">
-          Get Started
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
         </a>
       </div>
     </div>
@@ -690,6 +688,14 @@ Cool Cars               4,620.00
       const btn = document.querySelector('[data-tab="' + tab + '"]');
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
+    }
+
+    function copyHeroPrompt(btn) {
+      navigator.clipboard.writeText('Install the qbo CLI skill for QuickBooks Online access. Run: npx skills add -g voska/qbo-cli').then(() => {
+        const original = btn.innerHTML;
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+        setTimeout(() => { btn.innerHTML = original; }, 2000);
+      });
     }
 
     function copyText(text, btn) {
