@@ -1,27 +1,76 @@
 ---
 name: qbo
-description: |
-  Query, create, update, and manage QuickBooks Online data via the qbo CLI.
-  Use when working with QBO entities: invoices, customers, bills, payments,
-  vendors, accounts, items, estimates. Supports queries, CRUD, batch ops,
-  reports, and change data capture.
+description: Queries, creates, updates, and manages QuickBooks Online data via the qbo CLI. Use when working with QBO entities (invoices, customers, bills, payments, vendors, accounts, items, estimates), running reports, or setting up install, auth, sandbox, and company switching.
 allowed-tools: Bash(qbo *)
-compatibility: Requires qbo CLI installed and authenticated (qbo auth login)
-metadata:
-  author: masonitedoors
-  version: "1.0"
 ---
 
 # qbo — QuickBooks Online CLI
 
-## Setup
-
-Requires `QBO_CLIENT_ID` and `QBO_CLIENT_SECRET` env vars. OAuth callback runs on `localhost:8844`. Tokens are stored at `~/.config/qbo/tokens/`.
+## Install
 
 ```bash
-qbo auth login              # Opens browser for OAuth
-qbo auth login --sandbox    # Use sandbox environment
+# macOS / Linux
+brew install voska/tap/qbo
+
+# Scoop (Windows)
+scoop bucket add voska https://github.com/voska/scoop-bucket && scoop install qbo
+
+# Go (any platform)
+go install github.com/voska/qbo-cli/cmd/qbo@latest
+
+# Binary: https://github.com/voska/qbo-cli/releases
 ```
+
+## Getting Credentials
+
+Requires an Intuit Developer account and a QuickBooks app for OAuth credentials.
+
+1. Sign up at https://developer.intuit.com and create an app from the dashboard.
+2. Select **QuickBooks Online and Payments** as the platform.
+3. Under **Keys & credentials**, find your **Client ID** and **Client Secret**.
+4. Add `http://localhost:8844/callback` as a **Redirect URI**.
+
+See [Intuit's OAuth 2.0 guide](https://developer.intuit.com/app/developer/qbo/docs/develop/authentication-and-authorization/oauth-2.0) for the full walkthrough.
+
+**Sandbox vs Production:** Development keys only work with sandbox companies. For production access, complete Intuit's app assessment and use a public redirect URI (not localhost). Use a domain routed through a tunnel, or a non-resolving domain — when the redirect errors in the browser, copy the full callback URL and paste it into the terminal.
+
+## Setup
+
+```bash
+export QBO_CLIENT_ID=your_client_id
+export QBO_CLIENT_SECRET=your_client_secret
+
+# Authenticate (opens browser, listens on localhost:8844)
+qbo auth login
+
+# Or for sandbox
+qbo auth login --sandbox
+
+# Or print the URL without opening a browser (useful for agents/remote)
+qbo auth login --manual
+```
+
+Tokens are stored at `~/.config/qbo/tokens/`.
+
+### Verify
+
+After auth, confirm everything works:
+
+```bash
+qbo auth status
+qbo company info --sandbox --json
+```
+
+If you get "no company ID", set one: `export QBO_COMPANY_ID=<realm_id>` or `qbo company switch <realm_id>`.
+
+## Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| `no company ID` | `export QBO_COMPANY_ID=<realm>` or `qbo company switch <realm>` |
+| `ApplicationAuthorizationFailed` on production endpoint | Use `--sandbox` or re-authorize the app for a production company |
+| OAuth state mismatch | Restart `qbo auth login` and use the newly generated URL |
+| Token expired | `qbo auth refresh` or re-run `qbo auth login` |
 
 ## Response Structure
 
@@ -66,7 +115,7 @@ qbo report balance-sheet --sandbox --json
 qbo query "SELECT Id, DisplayName, Balance FROM Customer WHERE Active = true" --sandbox --json --results-only
 ```
 
-## Workflow: Create → Invoice → Payment
+## Workflow: Create -> Invoice -> Payment
 
 ```bash
 # 1. Create customer

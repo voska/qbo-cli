@@ -1,5 +1,7 @@
 # qbo — QuickBooks Online CLI
 
+[Website](https://voska.github.io/qbo-cli/) · [Releases](https://github.com/voska/qbo-cli/releases)
+
 CLI for humans and AI agents. Data goes to stdout (parseable), hints/progress to stderr.
 
 ## Install
@@ -32,27 +34,53 @@ curl -LO https://github.com/voska/qbo-cli/releases/latest/download/qbo_linux_amd
 sudo dpkg -i qbo_linux_amd64.deb
 ```
 
+## Agent Skill
+
+Install as a [Claude Code skill](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/skills) for AI-assisted QuickBooks workflows:
+
+```bash
+npx skills add -g voska/qbo-cli
+```
+
+The skill includes setup guidance, usage patterns, troubleshooting, and a full command reference.
+
+## Getting Credentials
+
+You need an Intuit Developer account to get OAuth credentials.
+
+1. Sign up at [developer.intuit.com](https://developer.intuit.com) and create an app.
+2. Select **QuickBooks Online and Payments** as the platform.
+3. Under **Keys & credentials**, grab your **Client ID** and **Client Secret**.
+4. Add `http://localhost:8844/callback` as a **Redirect URI**.
+
+See [Intuit's OAuth 2.0 guide](https://developer.intuit.com/app/developer/qbo/docs/develop/authentication-and-authorization/oauth-2.0) for the full walkthrough.
+
+> **Sandbox vs Production:** Development keys only work with sandbox companies. For production, you must complete Intuit's app assessment and use a public redirect URI (not localhost).
+
 ## Quick Start
 
 ```bash
-# Set up OAuth credentials
 export QBO_CLIENT_ID=your_client_id
 export QBO_CLIENT_SECRET=your_client_secret
 
-# Authenticate
-qbo auth login
+# Authenticate (sandbox)
+qbo auth login --sandbox
+
+# Verify
+qbo auth status
+qbo company info --sandbox --json
 
 # List invoices
-qbo list invoices
+qbo list invoices --sandbox
 
 # Get a specific customer
-qbo get customer 123
+qbo get customer 123 --sandbox
 
 # Query with filters
-qbo list invoices --where "Balance > '0'" --json
+qbo list invoices --where "Balance > '0'" --sandbox --json
 
 # Run a report
-qbo report profit-and-loss --start-date 2025-01-01 --end-date 2025-12-31
+qbo report profit-and-loss --start-date 2025-01-01 --end-date 2025-12-31 --sandbox
 ```
 
 ## Output Modes
@@ -84,14 +112,6 @@ Auto-JSON: when stdout is not a TTY and `QBO_AUTO_JSON=1`, defaults to JSON outp
 | `company info\|list\|switch` | Company management |
 | `schema` | CLI schema as JSON (agent introspection) |
 | `exit-codes` | Exit code reference |
-
-## Agent Skill
-
-Install as a Claude Code skill:
-
-```bash
-npx skills add -g voska/qbo-cli
-```
 
 ## Exit Codes
 
