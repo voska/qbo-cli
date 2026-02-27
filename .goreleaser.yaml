@@ -42,7 +42,6 @@ brews:
       owner: voska
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-      directory: Formula
     commit_author:
       name: voska-bot
       email: bot@voska.dev
