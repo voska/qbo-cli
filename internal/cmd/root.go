@@ -13,30 +13,30 @@ import (
 )
 
 type CLI struct {
-	JSON        bool     `short:"j" name:"json" help:"Output JSON to stdout." aliases:"machine"`
-	Plain       bool     `short:"p" name:"plain" help:"Output TSV, no color." aliases:"tsv"`
-	Select      []string `name:"select" help:"Project output to fields (dot paths)." aliases:"fields"`
-	ResultsOnly bool     `name:"results-only" help:"Strip pagination metadata."`
-	CompanyID   string   `name:"company-id" env:"QBO_COMPANY_ID" help:"Target company realm ID."`
-	Sandbox     bool     `help:"Use sandbox environment."`
-	DryRun      bool     `short:"n" name:"dry-run" help:"Show what would happen." aliases:"noop,preview"`
-	NoInput     bool     `name:"no-input" help:"Never prompt; fail if confirmation needed."`
-	Force       bool     `help:"Skip confirmations." aliases:"yes,assume-yes"`
-	Verbose     bool     `short:"v" help:"Verbose output to stderr."`
-	MinorVer    int      `name:"minor-version" default:"75" help:"QBO API minor version."`
-	Auth      AuthCmd      `cmd:"" help:"Authentication (login, logout, status, refresh)."`
-	Query     QueryCmd     `cmd:"" help:"Run a raw query against the QBO API."`
-	Get       GetCmd       `cmd:"" help:"Read a single entity by ID."`
-	Create    CreateCmd    `cmd:"" help:"Create an entity from JSON."`
-	Update    UpdateCmd    `cmd:"" help:"Update an entity."`
-	Delete    DeleteCmd    `cmd:"" help:"Delete an entity by ID."`
-	List      ListCmd      `cmd:"" help:"List entities (sugar for query)."`
-	Batch     BatchCmd     `cmd:"" help:"Run batch operations."`
-	CDC       CDCCmd       `cmd:"" name:"cdc" help:"Change data capture polling."`
-	Report    ReportCmd    `cmd:"" help:"Run a QBO report."`
-	Company   CompanyCmd   `cmd:"" help:"Company info and switching."`
-	Schema    SchemaCmd    `cmd:"" help:"Dump CLI schema as JSON for agent introspection."`
-	ExitCodes ExitCodesCmd `cmd:"" name:"exit-codes" help:"Print exit code table."`
+	JSON        bool         `short:"j" name:"json" help:"Output JSON to stdout." aliases:"machine"`
+	Plain       bool         `short:"p" name:"plain" help:"Output TSV, no color." aliases:"tsv"`
+	Select      []string     `name:"select" help:"Project output to fields (dot paths)." aliases:"fields"`
+	ResultsOnly bool         `name:"results-only" help:"Strip pagination metadata."`
+	CompanyID   string       `name:"company-id" env:"QBO_COMPANY_ID" help:"Target company realm ID."`
+	Sandbox     bool         `help:"Use sandbox environment."`
+	DryRun      bool         `short:"n" name:"dry-run" help:"Show what would happen." aliases:"noop,preview"`
+	NoInput     bool         `name:"no-input" help:"Never prompt; fail if confirmation needed."`
+	Force       bool         `help:"Skip confirmations." aliases:"yes,assume-yes"`
+	Verbose     bool         `short:"v" help:"Verbose output to stderr."`
+	MinorVer    int          `name:"minor-version" default:"75" help:"QBO API minor version."`
+	Auth        AuthCmd      `cmd:"" help:"Authentication (login, logout, status, refresh)."`
+	Query       QueryCmd     `cmd:"" help:"Run a raw query against the QBO API."`
+	Get         GetCmd       `cmd:"" help:"Read a single entity by ID."`
+	Create      CreateCmd    `cmd:"" help:"Create an entity from JSON."`
+	Update      UpdateCmd    `cmd:"" help:"Update an entity."`
+	Delete      DeleteCmd    `cmd:"" help:"Delete an entity by ID."`
+	List        ListCmd      `cmd:"" help:"List entities (sugar for query)."`
+	Batch       BatchCmd     `cmd:"" help:"Run batch operations."`
+	CDC         CDCCmd       `cmd:"" name:"cdc" help:"Change data capture polling."`
+	Report      ReportCmd    `cmd:"" help:"Run a QBO report."`
+	Company     CompanyCmd   `cmd:"" help:"Company info and switching."`
+	Schema      SchemaCmd    `cmd:"" help:"Dump CLI schema as JSON for agent introspection."`
+	ExitCodes   ExitCodesCmd `cmd:"" name:"exit-codes" help:"Print exit code table."`
 }
 
 type Globals struct {
@@ -111,7 +111,7 @@ func WriteOutput(ctx context.Context, data any) error {
 func DryRunLog(cli *CLI, method, endpoint string, body []byte) {
 	output.Hint("[dry-run] %s %s", method, endpoint)
 	if body != nil {
-		os.Stderr.Write(body)
-		os.Stderr.Write([]byte("\n"))
+		_, _ = os.Stderr.Write(body)
+		_, _ = os.Stderr.Write([]byte("\n"))
 	}
 }

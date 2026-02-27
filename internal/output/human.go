@@ -38,12 +38,12 @@ func writeTable(w io.Writer, headers []string, rows [][]string) {
 		for i, h := range headers {
 			parts[i] = bold.Styled(padRight(h, widths[i]))
 		}
-		fmt.Fprintln(w, strings.Join(parts, "  "))
+		_, _ = fmt.Fprintln(w, strings.Join(parts, "  "))
 		sep := make([]string, len(headers))
 		for i, width := range widths {
 			sep[i] = strings.Repeat("─", width)
 		}
-		fmt.Fprintln(w, strings.Join(sep, "  "))
+		_, _ = fmt.Fprintln(w, strings.Join(sep, "  "))
 	}
 
 	for _, row := range rows {
@@ -55,7 +55,7 @@ func writeTable(w io.Writer, headers []string, rows [][]string) {
 			}
 			parts[i] = padRight(cell, widths[i])
 		}
-		fmt.Fprintln(w, strings.Join(parts, "  "))
+		_, _ = fmt.Fprintln(w, strings.Join(parts, "  "))
 	}
 }
 

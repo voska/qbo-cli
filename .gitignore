@@ -4,3 +4,4 @@ dist/
 *.test
 *.out
 .DS_Store
+mise.toml

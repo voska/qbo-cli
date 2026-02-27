@@ -125,7 +125,7 @@ func (c *Client) do(req *http.Request) (map[string]any, error) {
 	if err != nil {
 		return nil, errfmt.Wrap(errfmt.ExitRetryable, "request failed", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {

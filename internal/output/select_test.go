@@ -61,7 +61,7 @@ func TestProjectFieldsSlice(t *testing.T) {
 func TestStripMetadata(t *testing.T) {
 	raw := `{"QueryResponse":{"Invoice":[{"Id":"1"},{"Id":"2"}],"startPosition":1,"maxResults":2,"totalCount":2}}`
 	var data any
-	json.Unmarshal([]byte(raw), &data)
+	_ = json.Unmarshal([]byte(raw), &data)
 
 	result := StripMetadata(data)
 	arr, ok := result.([]any)

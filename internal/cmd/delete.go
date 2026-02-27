@@ -32,7 +32,7 @@ func (c *DeleteCmd) Run(g *Globals) error {
 	if !g.CLI.Force && !g.CLI.NoInput {
 		fmt.Fprintf(os.Stderr, "Delete %s %s? [y/N] ", entity.Name, c.ID)
 		var confirm string
-		fmt.Scanln(&confirm)
+		_, _ = fmt.Scanln(&confirm)
 		if confirm != "y" && confirm != "Y" {
 			output.Hint("cancelled")
 			return nil
@@ -45,7 +45,7 @@ func (c *DeleteCmd) Run(g *Globals) error {
 	}
 
 	body, _ := json.Marshal(map[string]any{
-		"Id":       c.ID,
+		"Id":        c.ID,
 		"SyncToken": "0",
 	})
 

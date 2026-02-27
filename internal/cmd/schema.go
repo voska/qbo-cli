@@ -44,8 +44,8 @@ func fullSchema(version string) map[string]any {
 		"version": version,
 		"commands": []map[string]any{
 			{
-				"name":  "auth",
-				"help":  "Authentication (login, logout, status, refresh)",
+				"name": "auth",
+				"help": "Authentication (login, logout, status, refresh)",
 				"subcommands": []map[string]any{
 					{"name": "login", "help": "Authenticate with QuickBooks Online", "flags": []string{"--manual"}},
 					{"name": "logout", "help": "Remove stored credentials"},
@@ -54,9 +54,9 @@ func fullSchema(version string) map[string]any {
 				},
 			},
 			{
-				"name": "list",
-				"help": "List entities (sugar for query)",
-				"args": []string{"entity"},
+				"name":  "list",
+				"help":  "List entities (sugar for query)",
+				"args":  []string{"entity"},
 				"flags": []string{"--where", "--order-by", "--limit", "--offset"},
 			},
 			{

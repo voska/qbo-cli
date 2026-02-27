@@ -7,11 +7,11 @@ import (
 )
 
 type ListCmd struct {
-	Entity   string `arg:"" help:"Entity type (e.g. invoices, customers)."`
-	Where    string `name:"where" short:"w" help:"WHERE clause for filtering."`
-	OrderBy  string `name:"order-by" help:"ORDERBY clause."`
-	Limit    int    `name:"limit" short:"l" default:"100" help:"Max results to return."`
-	Offset   int    `name:"offset" default:"1" help:"Start position."`
+	Entity  string `arg:"" help:"Entity type (e.g. invoices, customers)."`
+	Where   string `name:"where" short:"w" help:"WHERE clause for filtering."`
+	OrderBy string `name:"order-by" help:"ORDERBY clause."`
+	Limit   int    `name:"limit" short:"l" default:"100" help:"Max results to return."`
+	Offset  int    `name:"offset" default:"1" help:"Start position."`
 }
 
 func (c *ListCmd) Run(g *Globals) error {

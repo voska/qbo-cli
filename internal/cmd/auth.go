@@ -85,7 +85,7 @@ func (c *AuthStatusCmd) Run(g *Globals) error {
 		return err
 	}
 	status := map[string]any{
-		"company_id":   realmID,
+		"company_id":    realmID,
 		"authenticated": true,
 		"token_expiry":  token.Expiry.Format(time.RFC3339),
 		"expired":       auth.IsTokenExpired(token),

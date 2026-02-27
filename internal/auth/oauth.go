@@ -86,7 +86,7 @@ func LoginInteractive(ctx context.Context, clientID, clientSecret string) (*Auth
 			http.Error(w, "exchange failed", http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprint(w, "<html><body><h2>Authenticated!</h2><p>You can close this window.</p></body></html>")
+		_, _ = fmt.Fprint(w, "<html><body><h2>Authenticated!</h2><p>You can close this window.</p></body></html>")
 		resultCh <- &AuthResult{Token: token, RealmID: realmID}
 	})
 
@@ -96,7 +96,7 @@ func LoginInteractive(ctx context.Context, clientID, clientSecret string) (*Auth
 			errCh <- serr
 		}
 	}()
-	defer server.Close()
+	defer func() { _ = server.Close() }()
 
 	authURL := cfg.AuthCodeURL(state, oauth2.AccessTypeOffline)
 	fmt.Fprintf(os.Stderr, "Open this URL in your browser:\n\n  %s\n\n", authURL)

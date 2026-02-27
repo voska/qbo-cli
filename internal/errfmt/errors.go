@@ -3,16 +3,16 @@ package errfmt
 import "fmt"
 
 const (
-	ExitOK         = 0
-	ExitError      = 1
-	ExitUsage      = 2
-	ExitEmpty      = 3
-	ExitAuth       = 4
-	ExitNotFound   = 5
-	ExitForbidden  = 6
-	ExitRateLimit  = 7
-	ExitRetryable  = 8
-	ExitConfig     = 10
+	ExitOK        = 0
+	ExitError     = 1
+	ExitUsage     = 2
+	ExitEmpty     = 3
+	ExitAuth      = 4
+	ExitNotFound  = 5
+	ExitForbidden = 6
+	ExitRateLimit = 7
+	ExitRetryable = 8
+	ExitConfig    = 10
 )
 
 type Error struct {
@@ -36,13 +36,13 @@ func Wrap(code int, msg string, err error) *Error {
 	return &Error{Code: code, Message: msg, Detail: err.Error()}
 }
 
-func Auth(msg string) *Error       { return New(ExitAuth, msg) }
-func NotFound(msg string) *Error   { return New(ExitNotFound, msg) }
-func Usage(msg string) *Error      { return New(ExitUsage, msg) }
-func Empty() *Error                { return New(ExitEmpty, "no results") }
-func Config(msg string) *Error     { return New(ExitConfig, msg) }
-func RateLimit() *Error            { return New(ExitRateLimit, "rate limited — retry later") }
-func Forbidden(msg string) *Error  { return New(ExitForbidden, msg) }
+func Auth(msg string) *Error      { return New(ExitAuth, msg) }
+func NotFound(msg string) *Error  { return New(ExitNotFound, msg) }
+func Usage(msg string) *Error     { return New(ExitUsage, msg) }
+func Empty() *Error               { return New(ExitEmpty, "no results") }
+func Config(msg string) *Error    { return New(ExitConfig, msg) }
+func RateLimit() *Error           { return New(ExitRateLimit, "rate limited — retry later") }
+func Forbidden(msg string) *Error { return New(ExitForbidden, msg) }
 
 type ExitCodeEntry struct {
 	Code        int    `json:"code"`
