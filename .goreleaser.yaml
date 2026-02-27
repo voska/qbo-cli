@@ -41,6 +41,7 @@ brews:
     repository:
       owner: voska
       name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     commit_author:
       name: voska-bot
       email: bot@voska.dev
@@ -57,6 +58,7 @@ scoops:
     repository:
       owner: voska
       name: scoop-bucket
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
 
 nfpms:
   - package_name: qbo
