@@ -18,7 +18,8 @@ type AuthCmd struct {
 }
 
 type AuthLoginCmd struct {
-	Manual bool `help:"Print URL for manual copy instead of opening browser."`
+	Manual      bool   `help:"Print URL for manual copy instead of opening browser."`
+	RedirectURI string `name:"redirect-uri" env:"QBO_REDIRECT_URI" help:"OAuth redirect URI override."`
 }
 
 func (c *AuthLoginCmd) Run(g *Globals) error {
@@ -28,14 +29,18 @@ func (c *AuthLoginCmd) Run(g *Globals) error {
 		return errfmt.Config("set QBO_CLIENT_ID and QBO_CLIENT_SECRET before logging in")
 	}
 
+	redirectURL := c.RedirectURI
+	if redirectURL == "" {
+		redirectURL = fmt.Sprintf("http://localhost:%d/callback", auth.DefaultCallbackPort)
+	}
+
 	if g.CLI.DryRun {
-		redirectURL := fmt.Sprintf("http://localhost:%d/callback", auth.DefaultCallbackPort)
 		url := auth.GetAuthURL(clientID, clientSecret, redirectURL, "STATE")
 		output.Hint("[dry-run] would open: %s", url)
 		return nil
 	}
 
-	result, err := auth.LoginInteractive(g.Ctx, clientID, clientSecret)
+	result, err := auth.LoginInteractive(g.Ctx, clientID, clientSecret, redirectURL)
 	if err != nil {
 		return err
 	}

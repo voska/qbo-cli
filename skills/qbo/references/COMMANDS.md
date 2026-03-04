@@ -168,5 +168,6 @@ Account, Bill, BillPayment, Budget, Class, CompanyInfo, CreditMemo, Customer, De
 | `QBO_CLIENT_ID` | OAuth client ID (required) |
 | `QBO_CLIENT_SECRET` | OAuth client secret (required) |
 | `QBO_COMPANY_ID` | Default company realm ID |
+| `QBO_REDIRECT_URI` | OAuth redirect URI override for `auth login` |
 | `QBO_AUTO_JSON` | Set to `1` for auto-JSON when stdout is piped |
 | `QBO_CONFIG_DIR` | Override config directory (default: `~/.config/qbo/`) |

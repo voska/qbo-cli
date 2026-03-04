@@ -52,13 +52,15 @@ func RefreshAccessToken(ctx context.Context, clientID, clientSecret string, toke
 
 const DefaultCallbackPort = 8844
 
-func LoginInteractive(ctx context.Context, clientID, clientSecret string) (*AuthResult, error) {
+func LoginInteractive(ctx context.Context, clientID, clientSecret, redirectURL string) (*AuthResult, error) {
 	addr := fmt.Sprintf("127.0.0.1:%d", DefaultCallbackPort)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, errfmt.Wrap(errfmt.ExitError, fmt.Sprintf("cannot listen on port %d — is another qbo login running?", DefaultCallbackPort), err)
 	}
-	redirectURL := fmt.Sprintf("http://localhost:%d/callback", DefaultCallbackPort)
+	if redirectURL == "" {
+		redirectURL = fmt.Sprintf("http://localhost:%d/callback", DefaultCallbackPort)
+	}
 
 	cfg := OAuthConfig(clientID, clientSecret, redirectURL)
 	state := GenerateState()

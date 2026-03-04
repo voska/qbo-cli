@@ -47,7 +47,7 @@ func fullSchema(version string) map[string]any {
 				"name": "auth",
 				"help": "Authentication (login, logout, status, refresh)",
 				"subcommands": []map[string]any{
-					{"name": "login", "help": "Authenticate with QuickBooks Online", "flags": []string{"--manual"}},
+					{"name": "login", "help": "Authenticate with QuickBooks Online", "flags": []string{"--manual", "--redirect-uri"}},
 					{"name": "logout", "help": "Remove stored credentials"},
 					{"name": "status", "help": "Show current auth status"},
 					{"name": "refresh", "help": "Force token refresh"},
