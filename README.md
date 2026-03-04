@@ -58,6 +58,29 @@ curl -LO https://github.com/voska/qbo-cli/releases/latest/download/qbo_linux_amd
 sudo dpkg -i qbo_linux_amd64.deb
 ```
 
+## Agent Skill
+
+Install as a [Claude Code skill](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/skills) for AI-assisted QuickBooks workflows:
+
+```bash
+npx skills add -g voska/qbo-cli
+```
+
+The skill includes setup guidance, usage patterns, troubleshooting, and a full command reference.
+
+## Getting Credentials
+
+You need an Intuit Developer account to get OAuth credentials.
+
+1. Sign up at [developer.intuit.com](https://developer.intuit.com) and create an app.
+2. Select **QuickBooks Online and Payments** as the platform.
+3. Under **Keys & credentials**, grab your **Client ID** and **Client Secret**.
+4. Add a **Redirect URI** — `http://localhost:8844/callback` for sandbox, or a public URI for production.
+
+See [Intuit's OAuth 2.0 guide](https://developer.intuit.com/app/developer/qbo/docs/develop/authentication-and-authorization/oauth-2.0) for the full walkthrough.
+
+> **Sandbox vs Production:** Development keys only work with sandbox companies. For production, complete Intuit's app assessment and use `--redirect-uri` (or `QBO_REDIRECT_URI`) with a public URI. You can use a tunnel, or any registered domain — after authorizing, paste the callback URL back into the CLI.
+
 ## Quick Start
 
 ```bash
@@ -83,29 +106,6 @@ qbo list invoices --where "Balance > '0'" --sandbox --json
 # Run a report
 qbo report profit-and-loss --start-date 2025-01-01 --end-date 2025-12-31 --sandbox
 ```
-
-## Getting Credentials
-
-You need an Intuit Developer account to get OAuth credentials.
-
-1. Sign up at [developer.intuit.com](https://developer.intuit.com) and create an app.
-2. Select **QuickBooks Online and Payments** as the platform.
-3. Under **Keys & credentials**, grab your **Client ID** and **Client Secret**.
-4. Add `http://localhost:8844/callback` as a **Redirect URI**.
-
-See [Intuit's OAuth 2.0 guide](https://developer.intuit.com/app/developer/qbo/docs/develop/authentication-and-authorization/oauth-2.0) for the full walkthrough.
-
-> **Sandbox vs Production:** Development keys only work with sandbox companies. For production, you must complete Intuit's app assessment and use a public redirect URI (not localhost).
-
-## Agent Skill
-
-Install as a [Claude Code skill](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/skills) for AI-assisted QuickBooks workflows:
-
-```bash
-npx skills add -g voska/qbo-cli
-```
-
-The skill includes setup guidance, usage patterns, troubleshooting, and a full command reference.
 
 ## Output Modes
 

@@ -1,15 +1,18 @@
 package auth
 
 import (
+	"bufio"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 
 	"github.com/voska/qbo-cli/internal/errfmt"
 	"golang.org/x/oauth2"
@@ -52,13 +55,36 @@ func RefreshAccessToken(ctx context.Context, clientID, clientSecret string, toke
 
 const DefaultCallbackPort = 8844
 
-func LoginInteractive(ctx context.Context, clientID, clientSecret string) (*AuthResult, error) {
+func DefaultRedirectURI() string {
+	return fmt.Sprintf("http://localhost:%d/callback", DefaultCallbackPort)
+}
+
+func isLocalRedirect(redirectURL string) bool {
+	u, err := url.Parse(redirectURL)
+	if err != nil {
+		return false
+	}
+	host := u.Hostname()
+	return host == "localhost" || host == "127.0.0.1" || host == "::1"
+}
+
+func LoginInteractive(ctx context.Context, clientID, clientSecret, redirectURL string) (*AuthResult, error) {
+	if redirectURL == "" {
+		redirectURL = DefaultRedirectURI()
+	}
+
+	if isLocalRedirect(redirectURL) {
+		return loginLocal(ctx, clientID, clientSecret, redirectURL)
+	}
+	return loginManual(ctx, clientID, clientSecret, redirectURL)
+}
+
+func loginLocal(ctx context.Context, clientID, clientSecret, redirectURL string) (*AuthResult, error) {
 	addr := fmt.Sprintf("127.0.0.1:%d", DefaultCallbackPort)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, errfmt.Wrap(errfmt.ExitError, fmt.Sprintf("cannot listen on port %d — is another qbo login running?", DefaultCallbackPort), err)
 	}
-	redirectURL := fmt.Sprintf("http://localhost:%d/callback", DefaultCallbackPort)
 
 	cfg := OAuthConfig(clientID, clientSecret, redirectURL)
 	state := GenerateState()
@@ -110,6 +136,47 @@ func LoginInteractive(ctx context.Context, clientID, clientSecret string) (*Auth
 	case <-ctx.Done():
 		return nil, errfmt.New(errfmt.ExitAuth, "login timed out")
 	}
+}
+
+func loginManual(ctx context.Context, clientID, clientSecret, redirectURL string) (*AuthResult, error) {
+	cfg := OAuthConfig(clientID, clientSecret, redirectURL)
+	state := GenerateState()
+
+	authURL := cfg.AuthCodeURL(state, oauth2.AccessTypeOffline)
+	fmt.Fprintf(os.Stderr, "Open this URL in your browser:\n\n  %s\n\n", authURL)
+	fmt.Fprintf(os.Stderr, "After authorizing, paste the full callback URL here:\n")
+
+	scanner := bufio.NewScanner(os.Stdin)
+	if !scanner.Scan() {
+		return nil, errfmt.New(errfmt.ExitAuth, "no input received")
+	}
+	callbackURL := strings.TrimSpace(scanner.Text())
+	if callbackURL == "" {
+		return nil, errfmt.New(errfmt.ExitAuth, "empty callback URL")
+	}
+
+	u, err := url.Parse(callbackURL)
+	if err != nil {
+		return nil, errfmt.Wrap(errfmt.ExitAuth, "invalid callback URL", err)
+	}
+
+	q := u.Query()
+	if q.Get("state") != state {
+		return nil, errfmt.New(errfmt.ExitAuth, "state mismatch — possible CSRF attack or stale URL")
+	}
+
+	code := q.Get("code")
+	realmID := q.Get("realmId")
+	if code == "" || realmID == "" {
+		return nil, errfmt.New(errfmt.ExitAuth, "callback URL missing code or realmId parameters")
+	}
+
+	token, err := cfg.Exchange(ctx, code)
+	if err != nil {
+		return nil, errfmt.Wrap(errfmt.ExitAuth, "token exchange failed", err)
+	}
+
+	return &AuthResult{Token: token, RealmID: realmID}, nil
 }
 
 func openBrowser(url string) {

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/voska/qbo-cli/internal/auth"
@@ -18,7 +17,8 @@ type AuthCmd struct {
 }
 
 type AuthLoginCmd struct {
-	Manual bool `help:"Print URL for manual copy instead of opening browser."`
+	Manual      bool   `help:"Print URL for manual copy instead of opening browser."`
+	RedirectURI string `name:"redirect-uri" help:"OAuth redirect URI. Required for production (non-localhost). Set via flag, QBO_REDIRECT_URI, or config." env:"QBO_REDIRECT_URI"`
 }
 
 func (c *AuthLoginCmd) Run(g *Globals) error {
@@ -28,14 +28,21 @@ func (c *AuthLoginCmd) Run(g *Globals) error {
 		return errfmt.Config("set QBO_CLIENT_ID and QBO_CLIENT_SECRET before logging in")
 	}
 
+	redirectURI := c.RedirectURI
+	if redirectURI == "" {
+		redirectURI = g.Config.ResolveRedirectURI()
+	}
+	if redirectURI == "" {
+		redirectURI = auth.DefaultRedirectURI()
+	}
+
 	if g.CLI.DryRun {
-		redirectURL := fmt.Sprintf("http://localhost:%d/callback", auth.DefaultCallbackPort)
-		url := auth.GetAuthURL(clientID, clientSecret, redirectURL, "STATE")
+		url := auth.GetAuthURL(clientID, clientSecret, redirectURI, "STATE")
 		output.Hint("[dry-run] would open: %s", url)
 		return nil
 	}
 
-	result, err := auth.LoginInteractive(g.Ctx, clientID, clientSecret)
+	result, err := auth.LoginInteractive(g.Ctx, clientID, clientSecret, redirectURI)
 	if err != nil {
 		return err
 	}

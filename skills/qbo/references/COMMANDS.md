@@ -41,13 +41,13 @@ All QBO responses are wrapped. Use `--json` for parsing.
 ### auth
 
 ```bash
-qbo auth login [--manual]     # OAuth flow on localhost:8844
+qbo auth login [--manual] [--redirect-uri URI]  # OAuth flow
 qbo auth logout               # Remove stored credentials
 qbo auth status               # Show token status and company
 qbo auth refresh              # Force token refresh
 ```
 
-OAuth callback listens on `http://localhost:8844/callback`. Register this as your redirect URI in the Intuit developer portal. Tokens stored at `~/.config/qbo/tokens/`.
+For sandbox, the default `http://localhost:8844/callback` redirect works automatically. For production, pass `--redirect-uri` (or set `QBO_REDIRECT_URI`) to a registered public URI. Non-localhost URIs use a manual flow: paste the callback URL after authorizing in the browser.
 
 ### list
 

@@ -24,6 +24,7 @@ type Config struct {
 	Companies      []Company `json:"companies,omitempty"`
 	ClientID       string    `json:"client_id,omitempty"`
 	ClientSecret   string    `json:"client_secret,omitempty"`
+	RedirectURI    string    `json:"redirect_uri,omitempty"`
 }
 
 func Dir() (string, error) {
@@ -113,4 +114,11 @@ func (c *Config) ResolveClientSecret() string {
 		return v
 	}
 	return c.ClientSecret
+}
+
+func (c *Config) ResolveRedirectURI() string {
+	if v := os.Getenv("QBO_REDIRECT_URI"); v != "" {
+		return v
+	}
+	return c.RedirectURI
 }

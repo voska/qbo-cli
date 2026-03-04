@@ -28,11 +28,19 @@ Requires an Intuit Developer account and a QuickBooks app for OAuth credentials.
 1. Sign up at https://developer.intuit.com and create an app from the dashboard.
 2. Select **QuickBooks Online and Payments** as the platform.
 3. Under **Keys & credentials**, find your **Client ID** and **Client Secret**.
-4. Add `http://localhost:8844/callback` as a **Redirect URI**.
+4. Add a **Redirect URI** (see below).
 
 See [Intuit's OAuth 2.0 guide](https://developer.intuit.com/app/developer/qbo/docs/develop/authentication-and-authorization/oauth-2.0) for the full walkthrough.
 
-**Sandbox vs Production:** Development keys only work with sandbox companies. For production access, complete Intuit's app assessment and use a public redirect URI (not localhost). Use a domain routed through a tunnel, or a non-resolving domain — when the redirect errors in the browser, copy the full callback URL and paste it into the terminal.
+### Redirect URI Options
+
+**Sandbox** allows `http://localhost:8844/callback` — just register it in the Intuit portal and `qbo auth login` handles everything automatically.
+
+**Production** does not allow localhost. Three options:
+
+1. **Tunnel/funnel address** — Route a domain (e.g. `https://auth.yourdomain.com`) back to your machine. Register it as the redirect URI. Use `--redirect-uri` or set `QBO_REDIRECT_URI`.
+2. **Login on the same machine** — If the agent runs on a machine with a browser, use a tunnel so localhost callbacks work.
+3. **Non-resolving domain** — Register any domain you own (e.g. `https://yourdomain.com`) as the redirect URI. After authorizing, the browser redirects there with `?code=...&realmId=...&state=...` in the URL. Copy the full URL from the browser and paste it back into `qbo auth login` (or provide it to the agent to exchange manually).
 
 ## Setup
 
@@ -40,17 +48,23 @@ See [Intuit's OAuth 2.0 guide](https://developer.intuit.com/app/developer/qbo/do
 export QBO_CLIENT_ID=your_client_id
 export QBO_CLIENT_SECRET=your_client_secret
 
-# Authenticate (opens browser, listens on localhost:8844)
-qbo auth login
-
-# Or for sandbox
+# Sandbox — uses localhost callback automatically
 qbo auth login --sandbox
 
-# Or print the URL without opening a browser (useful for agents/remote)
+# Production — specify your redirect URI
+qbo auth login --redirect-uri https://yourdomain.com
+
+# Or set it as env var / config so you don't need the flag every time
+export QBO_REDIRECT_URI=https://yourdomain.com
+qbo auth login
+
+# Print the URL without opening a browser (useful for agents/remote)
 qbo auth login --manual
 ```
 
-Tokens are stored at `~/.config/qbo/tokens/`.
+For non-localhost redirect URIs, `qbo auth login` prints the auth URL and prompts you to paste the callback URL after authorizing.
+
+Tokens are stored in the system keychain (macOS Keychain, Windows Credential Manager) with file-based fallback at `~/.config/qbo/tokens/`.
 
 ### Verify
 
