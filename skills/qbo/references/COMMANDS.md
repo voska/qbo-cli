@@ -144,6 +144,20 @@ qbo company list              # List configured companies
 qbo company switch <realm-id> # Set default company
 ```
 
+### attach
+
+```bash
+qbo attach [entity-type entity-id] <file> [--note TEXT] [--include-on-send]
+```
+
+### download
+
+```bash
+qbo download <id> [-o path] [--url]
+```
+
+`--url` prints the temporary download URL instead of saving the file.
+
 ### schema
 
 ```bash
@@ -159,7 +173,7 @@ qbo exit-codes --json
 
 ## Supported Entities
 
-Account, Bill, BillPayment, Budget, Class, CompanyInfo, CreditMemo, Customer, Department, Deposit, Employee, Estimate, Invoice, Item, JournalEntry, Payment, PaymentMethod, Preferences, Purchase, PurchaseOrder, RefundReceipt, SalesReceipt, TaxCode, TaxRate, Term, TimeActivity, Transfer, Vendor, VendorCredit.
+Account, Attachable, Bill, BillPayment, Budget, Class, CompanyInfo, CreditMemo, Customer, Department, Deposit, Employee, Estimate, Invoice, Item, JournalEntry, Payment, PaymentMethod, Preferences, Purchase, PurchaseOrder, RefundReceipt, SalesReceipt, TaxCode, TaxRate, Term, TimeActivity, Transfer, Vendor, VendorCredit.
 
 ## Environment Variables
 

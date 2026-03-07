@@ -1,6 +1,6 @@
 ---
 name: qbo
-description: Queries, creates, updates, and manages QuickBooks Online data via the qbo CLI. Use when working with QBO entities (invoices, customers, bills, payments, vendors, accounts, items, estimates), running reports, or setting up install, auth, sandbox, and company switching.
+description: Queries, creates, updates, and manages QuickBooks Online data via the qbo CLI. Use when working with QBO entities (invoices, customers, bills, payments, vendors, accounts, items, estimates, attachables), running reports, or setting up install, auth, sandbox, and company switching.
 allowed-tools: Bash(qbo *)
 ---
 
@@ -147,6 +147,14 @@ echo '{"CustomerRef":{"value":"CUSTOMER_ID"},"Line":[{"Amount":1500,"DetailType"
 # 4. Record payment
 echo '{"CustomerRef":{"value":"CUSTOMER_ID"},"TotalAmt":1500,"Line":[{"Amount":1500,"LinkedTxn":[{"TxnId":"INVOICE_ID","TxnType":"Invoice"}]}]}' \
   | qbo create payment -f - --sandbox --json
+```
+
+## Attachments
+
+```bash
+qbo attach invoice 123 receipt.pdf --json
+qbo list attachable --where "AttachableRef.EntityRef.value = '123'" --json --results-only
+qbo download <id>
 ```
 
 ## Agent Introspection
