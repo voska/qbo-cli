@@ -112,6 +112,18 @@ func fullSchema(version string) map[string]any {
 				},
 			},
 			{
+				"name":  "attach",
+				"help":  "Upload a file attachment to an entity",
+				"args":  []string{"entity-type?", "entity-id?", "file"},
+				"flags": []string{"--note", "--include-on-send"},
+			},
+			{
+				"name":  "download",
+				"help":  "Download an attachment file",
+				"args":  []string{"id"},
+				"flags": []string{"--output", "--url"},
+			},
+			{
 				"name": "schema",
 				"help": "Dump CLI schema as JSON for agent introspection",
 				"args": []string{"command?"},

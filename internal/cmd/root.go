@@ -35,6 +35,8 @@ type CLI struct {
 	CDC         CDCCmd       `cmd:"" name:"cdc" help:"Change data capture polling."`
 	Report      ReportCmd    `cmd:"" help:"Run a QBO report."`
 	Company     CompanyCmd   `cmd:"" help:"Company info and switching."`
+	Attach      AttachCmd    `cmd:"" help:"Upload a file attachment to an entity."`
+	Download    DownloadCmd  `cmd:"" help:"Download an attachment file."`
 	Schema      SchemaCmd    `cmd:"" help:"Dump CLI schema as JSON for agent introspection."`
 	ExitCodes   ExitCodesCmd `cmd:"" name:"exit-codes" help:"Print exit code table."`
 }
