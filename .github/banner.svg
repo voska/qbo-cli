@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" fill="none">
+  <rect width="800" height="200" rx="12" fill="#1a1b26"/>
+  <!-- Tool name -->
+  <text x="100" y="120" font-family="ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="72" font-weight="700" fill="#7aa2f7">qbo</text>
+  <text x="267" y="120" font-family="ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="72" font-weight="300" fill="#a9b1d6">cli</text>
+  <!-- Tagline -->
+  <text x="100" y="158" font-family="ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="18" fill="#565f89">QuickBooks Online from the terminal</text>
+  <!-- Example commands -->
+  <g transform="translate(500, 45)">
+    <text font-family="ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="14">
+      <tspan x="0" dy="0" fill="#7aa2f7" opacity="0.6"><tspan fill="#9ece6a" opacity="0.7">$</tspan> qbo list invoices --json</tspan>
+      <tspan x="0" dy="24" fill="#7aa2f7" opacity="0.6"><tspan fill="#9ece6a" opacity="0.7">$</tspan> qbo report profit-and-loss</tspan>
+      <tspan x="0" dy="24" fill="#7aa2f7" opacity="0.6"><tspan fill="#9ece6a" opacity="0.7">$</tspan> qbo get customer 42</tspan>
+      <tspan x="0" dy="24" fill="#7aa2f7" opacity="0.6"><tspan fill="#9ece6a" opacity="0.7">$</tspan> qbo query "SELECT * FROM Bill"</tspan>
+    </text>
+  </g>
+</svg>

@@ -35,6 +35,7 @@ changelog:
 
 brews:
   - name: qbo
+    directory: Formula
     homepage: "https://github.com/voska/qbo-cli"
     description: "QuickBooks Online CLI for humans and AI agents"
     license: "MIT"

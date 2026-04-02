@@ -2,7 +2,7 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev
 LDFLAGS := -s -w -X main.version=$(VERSION)
 BIN     := bin/qbo
 
-.PHONY: build test lint clean fmt vet
+.PHONY: build test lint clean fmt vet ci
 
 build:
 	go build -ldflags "$(LDFLAGS)" -o $(BIN) ./cmd/qbo
@@ -21,6 +21,8 @@ vet:
 
 clean:
 	rm -rf bin/
+
+ci: fmt lint vet test build
 
 install: build
 	cp $(BIN) $(GOPATH)/bin/qbo 2>/dev/null || cp $(BIN) ~/go/bin/qbo
