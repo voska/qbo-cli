@@ -7,7 +7,7 @@ Set Height 500
 Set Theme "Catppuccin Mocha"
 Set Padding 20
 
-Type "qbo list invoices --where \"Balance > '0'\" --sandbox"
+Type "qbo list invoices --limit 5 --sandbox"
 Sleep 500ms
 Enter
 Sleep 3s
