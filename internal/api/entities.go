@@ -14,6 +14,7 @@ type EntityInfo struct {
 
 var entities = map[string]EntityInfo{
 	"account":       {Name: "Account", Endpoint: "account", Queryable: true, Creatable: true, Updatable: true},
+	"attachable":    {Name: "Attachable", Endpoint: "attachable", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
 	"bill":          {Name: "Bill", Endpoint: "bill", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
 	"billpayment":   {Name: "BillPayment", Endpoint: "billpayment", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
 	"budget":        {Name: "Budget", Endpoint: "budget", Queryable: true},
