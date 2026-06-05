@@ -34,6 +34,7 @@ type CLI struct {
 	Batch       BatchCmd     `cmd:"" help:"Run batch operations."`
 	CDC         CDCCmd       `cmd:"" name:"cdc" help:"Change data capture polling."`
 	Report      ReportCmd    `cmd:"" help:"Run a QBO report."`
+	Invoice     InvoiceCmd   `cmd:"" help:"Invoice utilities."`
 	Company     CompanyCmd   `cmd:"" help:"Company info and switching."`
 	Schema      SchemaCmd    `cmd:"" help:"Dump CLI schema as JSON for agent introspection."`
 	ExitCodes   ExitCodesCmd `cmd:"" name:"exit-codes" help:"Print exit code table."`

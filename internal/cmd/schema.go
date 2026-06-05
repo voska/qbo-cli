@@ -103,6 +103,18 @@ func fullSchema(version string) map[string]any {
 				"flags": []string{"--start-date", "--end-date"},
 			},
 			{
+				"name": "invoice",
+				"help": "Invoice utilities",
+				"subcommands": []map[string]any{
+					{
+						"name":  "pdf",
+						"help":  "Download a QBO-rendered invoice PDF",
+						"args":  []string{"id"},
+						"flags": []string{"--out"},
+					},
+				},
+			},
+			{
 				"name": "company",
 				"help": "Company info and switching",
 				"subcommands": []map[string]any{

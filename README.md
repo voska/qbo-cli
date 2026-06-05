@@ -99,6 +99,9 @@ qbo list invoices --where "Balance > '0'" --sandbox --json
 
 # Run a report
 qbo report profit-and-loss --start-date 2025-01-01 --end-date 2025-12-31 --sandbox
+
+# Download a QBO-rendered invoice PDF
+qbo invoice pdf 123 --out invoice-123.pdf --sandbox
 ```
 
 ## Agent Skill
@@ -140,6 +143,7 @@ Uses the [QuickBooks Online Accounting API](https://developer.intuit.com/app/dev
 | `delete <entity> <id>` | Delete an entity by ID |
 | `query "<sql>"` | Raw QBO query |
 | `report <type>` | Financial reports (profit-and-loss, balance-sheet, etc.) |
+| `invoice pdf <id> --out <path>` | Download a QBO-rendered invoice PDF |
 | `batch --file <path>` | Batch operations from file |
 | `cdc --entities --since` | Change data capture polling |
 | `company info\|list\|switch` | Company management |

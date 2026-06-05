@@ -66,6 +66,12 @@ func (c *Client) Read(ctx context.Context, entity string, id string) (map[string
 	return c.get(ctx, endpoint)
 }
 
+func (c *Client) InvoicePDF(ctx context.Context, id string) ([]byte, error) {
+	endpoint := c.url("invoice/" + id + "/pdf")
+	endpoint = c.addMinorVersion(endpoint)
+	return c.getBytes(ctx, endpoint, "application/pdf")
+}
+
 func (c *Client) Create(ctx context.Context, entity string, body []byte) (map[string]any, error) {
 	endpoint := c.url(entity)
 	endpoint = c.addMinorVersion(endpoint)
@@ -110,6 +116,15 @@ func (c *Client) get(ctx context.Context, endpoint string) (map[string]any, erro
 	return c.do(req)
 }
 
+func (c *Client) getBytes(ctx context.Context, endpoint string, accept string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	if err != nil {
+		return nil, errfmt.Wrap(errfmt.ExitError, "cannot build request", err)
+	}
+	req.Header.Set("Accept", accept)
+	return c.doBytes(req)
+}
+
 func (c *Client) post(ctx context.Context, endpoint string, body []byte) (map[string]any, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, strings.NewReader(string(body)))
 	if err != nil {
@@ -141,6 +156,25 @@ func (c *Client) do(req *http.Request) (map[string]any, error) {
 		return nil, errfmt.Wrap(errfmt.ExitError, "cannot parse response", err)
 	}
 	return result, nil
+}
+
+func (c *Client) doBytes(req *http.Request) ([]byte, error) {
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, errfmt.Wrap(errfmt.ExitRetryable, "request failed", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errfmt.Wrap(errfmt.ExitError, "cannot read response", err)
+	}
+
+	if resp.StatusCode >= 400 {
+		return nil, mapHTTPError(resp.StatusCode, respBody)
+	}
+
+	return respBody, nil
 }
 
 func mapHTTPError(status int, body []byte) *errfmt.Error {
