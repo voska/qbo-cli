@@ -66,6 +66,11 @@ func StripMetadata(data any) any {
 					}
 				}
 			}
+			// QueryResponse present but no entity array means zero matching
+			// rows (QBO omits the entity key entirely). Return an empty slice
+			// so callers always get an array — e.g. an empty RecurringTransaction
+			// list — instead of the raw envelope.
+			return []any{}
 		}
 	}
 	return data

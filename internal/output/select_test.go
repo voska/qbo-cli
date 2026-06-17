@@ -72,3 +72,38 @@ func TestStripMetadata(t *testing.T) {
 		t.Fatalf("len = %d, want 2", len(arr))
 	}
 }
+
+func TestStripMetadataRecurringTransaction(t *testing.T) {
+	raw := `{"QueryResponse":{"RecurringTransaction":[{"Invoice":{"Id":"1"}},{"Bill":{"Id":"2"}}],"maxResults":2},"time":"t"}`
+	var data any
+	_ = json.Unmarshal([]byte(raw), &data)
+
+	result := StripMetadata(data)
+	arr, ok := result.([]any)
+	if !ok {
+		t.Fatalf("expected []any, got %T", result)
+	}
+	if len(arr) != 2 {
+		t.Fatalf("len = %d, want 2", len(arr))
+	}
+	first, _ := arr[0].(map[string]any)
+	if _, ok := first["Invoice"]; !ok {
+		t.Errorf("heterogeneous wrapper not preserved: %v", first)
+	}
+}
+
+func TestStripMetadataEmpty(t *testing.T) {
+	// QBO omits the entity key entirely when there are no rows.
+	raw := `{"QueryResponse":{"maxResults":0,"startPosition":1},"time":"t"}`
+	var data any
+	_ = json.Unmarshal([]byte(raw), &data)
+
+	result := StripMetadata(data)
+	arr, ok := result.([]any)
+	if !ok {
+		t.Fatalf("expected []any for empty result, got %T", result)
+	}
+	if len(arr) != 0 {
+		t.Errorf("len = %d, want 0", len(arr))
+	}
+}

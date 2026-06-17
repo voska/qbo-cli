@@ -25,7 +25,11 @@ func (c *DeleteCmd) Run(g *Globals) error {
 	}
 
 	if g.CLI.DryRun {
-		output.Hint("[dry-run] POST /v3/company/{id}/%s?operation=delete (id=%s)", entity.Endpoint, c.ID)
+		if entity.DeleteNeedsFullObject {
+			output.Hint("[dry-run] GET then POST /v3/company/{id}/%s?operation=delete (id=%s; full object echoed back)", entity.Endpoint, c.ID)
+		} else {
+			output.Hint("[dry-run] POST /v3/company/{id}/%s?operation=delete (id=%s)", entity.Endpoint, c.ID)
+		}
 		return nil
 	}
 
@@ -44,12 +48,17 @@ func (c *DeleteCmd) Run(g *Globals) error {
 		return err
 	}
 
-	body, _ := json.Marshal(map[string]any{
-		"Id":        c.ID,
-		"SyncToken": "0",
-	})
-
-	result, err := client.Delete(g.Ctx, entity.Endpoint, body)
+	var result map[string]any
+	if entity.DeleteNeedsFullObject {
+		// QBO requires the full template echoed back; read it, then delete.
+		result, err = client.DeleteRecurringTransaction(g.Ctx, c.ID)
+	} else {
+		body, _ := json.Marshal(map[string]any{
+			"Id":        c.ID,
+			"SyncToken": "0",
+		})
+		result, err = client.Delete(g.Ctx, entity.Endpoint, body)
+	}
 	if err != nil {
 		return err
 	}

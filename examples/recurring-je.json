@@ -1,0 +1,36 @@
+{
+  "JournalEntry": {
+    "RecurringInfo": {
+      "Name": "Prepaid Insurance Amortization",
+      "RecurType": "Automated",
+      "Active": true,
+      "ScheduleInfo": {
+        "IntervalType": "Monthly",
+        "NumInterval": 1,
+        "DayOfMonth": 1,
+        "StartDate": "2026-01-01",
+        "MaxOccurrences": 12
+      }
+    },
+    "Line": [
+      {
+        "Description": "Monthly amortization of prepaid insurance",
+        "Amount": 100.00,
+        "DetailType": "JournalEntryLineDetail",
+        "JournalEntryLineDetail": {
+          "PostingType": "Debit",
+          "AccountRef": { "value": "REPLACE_INSURANCE_EXPENSE_ACCOUNT_ID" }
+        }
+      },
+      {
+        "Description": "Monthly amortization of prepaid insurance",
+        "Amount": 100.00,
+        "DetailType": "JournalEntryLineDetail",
+        "JournalEntryLineDetail": {
+          "PostingType": "Credit",
+          "AccountRef": { "value": "REPLACE_PREPAID_ASSET_ACCOUNT_ID" }
+        }
+      }
+    ]
+  }
+}

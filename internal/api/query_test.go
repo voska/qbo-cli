@@ -71,6 +71,9 @@ func TestLookupEntity(t *testing.T) {
 		{"customer", "Customer", true},
 		{"customers", "Customer", true},
 		{"bill-payment", "BillPayment", true},
+		{"recurringtransaction", "RecurringTransaction", true},
+		{"recurring-transaction", "RecurringTransaction", true},
+		{"RecurringTransaction", "RecurringTransaction", true},
 		{"unknown", "", false},
 	}
 
@@ -84,5 +87,18 @@ func TestLookupEntity(t *testing.T) {
 				t.Errorf("LookupEntity(%q) name = %q, want %q", tt.input, e.Name, tt.wantName)
 			}
 		})
+	}
+}
+
+func TestRecurringTransactionEntity(t *testing.T) {
+	e, ok := LookupEntity("recurringtransaction")
+	if !ok {
+		t.Fatal("recurringtransaction not registered")
+	}
+	if !e.Queryable || !e.Creatable || !e.Updatable || !e.Deletable {
+		t.Error("recurringtransaction should support full CRUD")
+	}
+	if !e.DeleteNeedsFullObject {
+		t.Error("recurringtransaction delete should require the full object")
 	}
 }

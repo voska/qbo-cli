@@ -1,6 +1,6 @@
 ---
 name: qbo
-description: Queries, creates, updates, and manages QuickBooks Online data via the qbo CLI. Use when working with QBO entities (invoices, customers, bills, payments, vendors, accounts, items, estimates, attachables), running reports, or setting up install, auth, sandbox, and company switching.
+description: Queries, creates, updates, and manages QuickBooks Online data via the qbo CLI. Use when working with QBO entities (invoices, customers, bills, payments, vendors, accounts, items, estimates, attachables, recurring transactions), running reports, or setting up install, auth, sandbox, and company switching.
 allowed-tools: Bash(qbo *)
 ---
 
@@ -155,6 +155,19 @@ echo '{"CustomerRef":{"value":"CUSTOMER_ID"},"TotalAmt":1500,"Line":[{"Amount":1
 qbo attach invoice 123 receipt.pdf --json
 qbo list attachable --where "AttachableRef.EntityRef.value = '123'" --json --results-only
 qbo download <id>
+```
+
+## Recurring Transactions
+
+Templates that auto-post transactions on a schedule (e.g. monthly amortization).
+Each record wraps an underlying transaction by type with a nested `RecurringInfo`
+block: `{"JournalEntry": {"RecurringInfo": {...}, "Line": [...]}}`.
+
+```bash
+qbo list recurringtransaction --json --results-only
+qbo get recurringtransaction <id> --json
+qbo create recurringtransaction -f examples/recurring-je.json --json
+qbo delete recurringtransaction <id>   # reads + echoes the full object for you
 ```
 
 ## Agent Introspection

@@ -173,7 +173,14 @@ qbo exit-codes --json
 
 ## Supported Entities
 
-Account, Attachable, Bill, BillPayment, Budget, Class, CompanyInfo, CreditMemo, Customer, Department, Deposit, Employee, Estimate, Invoice, Item, JournalEntry, Payment, PaymentMethod, Preferences, Purchase, PurchaseOrder, RefundReceipt, SalesReceipt, TaxCode, TaxRate, Term, TimeActivity, Transfer, Vendor, VendorCredit.
+Account, Attachable, Bill, BillPayment, Budget, Class, CompanyInfo, CreditMemo, Customer, Department, Deposit, Employee, Estimate, Invoice, Item, JournalEntry, Payment, PaymentMethod, Preferences, Purchase, PurchaseOrder, RecurringTransaction, RefundReceipt, SalesReceipt, TaxCode, TaxRate, Term, TimeActivity, Transfer, Vendor, VendorCredit.
+
+### RecurringTransaction
+
+A template that wraps an underlying transaction by type (`{"JournalEntry": {…, "RecurringInfo": {…}}}`)
+and auto-posts on a schedule. Use the standard `list`/`get`/`create`/`update`/`delete` verbs;
+`delete` reads and echoes back the full object as QBO requires. See
+[../../docs/api/recurringtransaction.md](../../docs/api/recurringtransaction.md).
 
 ## Environment Variables
 
