@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -41,6 +42,9 @@ func (c *DownloadCmd) Run(g *Globals) error {
 			return err
 		}
 		savePath = extractFileName(meta)
+		if savePath == "" {
+			return errfmt.Usage("attachable " + c.ID + " has no file name — pass -o to choose an output path")
+		}
 	}
 
 	body, err := client.Download(g.Ctx, c.ID)
@@ -54,19 +58,26 @@ func (c *DownloadCmd) Run(g *Globals) error {
 		return errfmt.Wrap(errfmt.ExitError, "cannot create file", err)
 	}
 
-	_, err = io.Copy(f, body)
+	n, err := io.Copy(f, io.LimitReader(body, maxUploadSize+1))
 	_ = f.Close()
 	if err != nil {
 		_ = os.Remove(savePath)
 		return errfmt.Wrap(errfmt.ExitError, "cannot write file", err)
 	}
+	if n > maxUploadSize {
+		_ = os.Remove(savePath)
+		return errfmt.New(errfmt.ExitError, fmt.Sprintf("download exceeds %d byte limit", maxUploadSize))
+	}
 
-	output.Hint("saved %s", savePath)
-	return nil
+	output.Hint("saved %s (%d bytes)", savePath, n)
+	return WriteOutput(g.Ctx, map[string]any{"id": c.ID, "path": savePath, "bytes": n})
 }
 
 func extractFileName(meta map[string]any) string {
 	att, _ := meta["Attachable"].(map[string]any)
 	name, _ := att["FileName"].(string)
+	if name == "" {
+		return ""
+	}
 	return filepath.Base(name)
 }

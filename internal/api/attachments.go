@@ -3,15 +3,21 @@ package api
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
 	"strings"
+	"time"
 
 	"github.com/voska/qbo-cli/internal/errfmt"
 )
+
+// downloadTimeout bounds the fetch of a pre-signed attachment URL. It is
+// generous because attachments may be up to the 100 MB upload limit.
+const downloadTimeout = 10 * time.Minute
 
 func (c *Client) Upload(ctx context.Context, metadata []byte, filename, contentType string, fileContent io.Reader) (map[string]any, error) {
 	var body bytes.Buffer
@@ -96,15 +102,30 @@ func (c *Client) FetchDownloadURL(ctx context.Context, attachableID string) (str
 		return "", mapHTTPError(resp.StatusCode, respBody)
 	}
 
-	return strings.TrimSpace(string(respBody)), nil
+	// The download endpoint returns the URL as a JSON-quoted string literal,
+	// e.g. "https://...?Expires=...". Unwrap it so callers get a usable URL
+	// rather than one wrapped in stray double quotes.
+	trimmed := strings.TrimSpace(string(respBody))
+	var url string
+	if err := json.Unmarshal([]byte(trimmed), &url); err != nil {
+		url = strings.Trim(trimmed, `"`)
+	}
+	return url, nil
 }
 
 func (c *Client) Download(ctx context.Context, attachableID string) (io.ReadCloser, error) {
-	presignedQBOAttachableURL, err := c.FetchDownloadURL(ctx, attachableID)
+	presignedURL, err := c.FetchDownloadURL(ctx, attachableID)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := http.Get(presignedQBOAttachableURL) //nolint:gosec // pre-signed download URL from QBO API
+	// The pre-signed URL points at external storage (not the QBO API host) and
+	// carries its own signature, so use a plain context-aware client — never the
+	// OAuth client, which would leak the bearer token to a third party.
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, presignedURL, nil)
+	if err != nil {
+		return nil, errfmt.Wrap(errfmt.ExitError, "cannot build request", err)
+	}
+	resp, err := (&http.Client{Timeout: downloadTimeout}).Do(req) //nolint:gosec // pre-signed download URL from QBO API
 	if err != nil {
 		return nil, errfmt.Wrap(errfmt.ExitRetryable, "download failed", err)
 	}

@@ -6,6 +6,7 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/voska/qbo-cli/internal/api"
 	"github.com/voska/qbo-cli/internal/errfmt"
@@ -52,6 +53,11 @@ func (c *AttachCmd) Run(g *Globals) error {
 
 	fileName := fi.Name()
 	contentType := mime.TypeByExtension(filepath.Ext(filePath))
+	// mime.TypeByExtension may append parameters (e.g. "text/plain; charset=utf-8");
+	// QBO expects a bare media type, so drop anything after the first ';'.
+	if i := strings.IndexByte(contentType, ';'); i >= 0 {
+		contentType = strings.TrimSpace(contentType[:i])
+	}
 
 	metadata := buildMetadata(fileName, contentType, c.Note, entityName, entityID, c.IncludeOnSend)
 	metaJSON, err := json.Marshal(metadata)
