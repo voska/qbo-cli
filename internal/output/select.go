@@ -52,6 +52,15 @@ func getPath(m map[string]any, path string) any {
 	return current
 }
 
+// IsEmpty reports whether a QBO query/list response contains zero rows.
+// Non-query responses (single reads, reports) are never considered empty.
+func IsEmpty(data any) bool {
+	if arr, ok := StripMetadata(data).([]any); ok {
+		return len(arr) == 0
+	}
+	return false
+}
+
 func StripMetadata(data any) any {
 	m, ok := data.(map[string]any)
 	if !ok {

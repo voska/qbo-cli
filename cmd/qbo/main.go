@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/alecthomas/kong"
 	"github.com/voska/qbo-cli/internal/cmd"
@@ -20,19 +23,21 @@ func main() {
 		kong.UsageOnError(),
 	)
 
-	ctx, err := parser.Parse(os.Args[1:])
+	kctx, err := parser.Parse(os.Args[1:])
 	if err != nil {
 		parser.FatalIfErrorf(err)
 	}
 
-	globals, err := cmd.NewGlobals(&cli)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	globals, err := cmd.NewGlobals(ctx, &cli)
 	if err != nil {
 		handleError(err)
 	}
 	globals.Version = version
 
-	err = ctx.Run(globals)
-	if err != nil {
+	if err := kctx.Run(globals); err != nil {
 		handleError(err)
 	}
 }

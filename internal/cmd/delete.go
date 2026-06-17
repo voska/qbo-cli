@@ -33,7 +33,10 @@ func (c *DeleteCmd) Run(g *Globals) error {
 		return nil
 	}
 
-	if !g.CLI.Force && !g.CLI.NoInput {
+	if !g.CLI.Force {
+		if g.CLI.NoInput {
+			return errfmt.Usage("refusing to delete without --force in --no-input mode")
+		}
 		fmt.Fprintf(os.Stderr, "Delete %s %s? [y/N] ", entity.Name, c.ID)
 		var confirm string
 		_, _ = fmt.Scanln(&confirm)

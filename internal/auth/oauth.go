@@ -13,20 +13,27 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/voska/qbo-cli/internal/errfmt"
 	"golang.org/x/oauth2"
 )
+
+// loginTimeout bounds the local browser-callback login so an abandoned login
+// releases the callback port instead of hanging forever.
+const loginTimeout = 5 * time.Minute
 
 type AuthResult struct {
 	Token   *oauth2.Token
 	RealmID string
 }
 
-func GenerateState() string {
+func GenerateState() (string, error) {
 	b := make([]byte, 16)
-	_, _ = rand.Read(b)
-	return hex.EncodeToString(b)
+	if _, err := rand.Read(b); err != nil {
+		return "", errfmt.Wrap(errfmt.ExitError, "cannot generate secure OAuth state", err)
+	}
+	return hex.EncodeToString(b), nil
 }
 
 func GetAuthURL(clientID, clientSecret, redirectURL, state string) string {
@@ -80,6 +87,9 @@ func LoginInteractive(ctx context.Context, clientID, clientSecret, redirectURL s
 }
 
 func loginLocal(ctx context.Context, clientID, clientSecret, redirectURL string) (*AuthResult, error) {
+	ctx, cancel := context.WithTimeout(ctx, loginTimeout)
+	defer cancel()
+
 	addr := fmt.Sprintf("127.0.0.1:%d", DefaultCallbackPort)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -87,7 +97,10 @@ func loginLocal(ctx context.Context, clientID, clientSecret, redirectURL string)
 	}
 
 	cfg := OAuthConfig(clientID, clientSecret, redirectURL)
-	state := GenerateState()
+	state, err := GenerateState()
+	if err != nil {
+		return nil, err
+	}
 
 	resultCh := make(chan *AuthResult, 1)
 	errCh := make(chan error, 1)
@@ -140,7 +153,10 @@ func loginLocal(ctx context.Context, clientID, clientSecret, redirectURL string)
 
 func loginManual(ctx context.Context, clientID, clientSecret, redirectURL string) (*AuthResult, error) {
 	cfg := OAuthConfig(clientID, clientSecret, redirectURL)
-	state := GenerateState()
+	state, err := GenerateState()
+	if err != nil {
+		return nil, err
+	}
 
 	authURL := cfg.AuthCodeURL(state, oauth2.AccessTypeOffline)
 	fmt.Fprintf(os.Stderr, "Open this URL in your browser:\n\n  %s\n\n", authURL)

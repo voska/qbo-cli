@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/voska/qbo-cli/internal/errfmt"
 	"golang.org/x/oauth2"
@@ -16,6 +17,11 @@ import (
 const (
 	BaseURLProduction = "https://quickbooks.api.intuit.com"
 	BaseURLSandbox    = "https://sandbox-quickbooks.api.intuit.com"
+
+	// requestTimeout bounds a single API call so a stalled connection can't
+	// hang the CLI indefinitely. Per-call cancellation also flows from the
+	// request context (e.g. Ctrl-C), this is the hard upper bound.
+	requestTimeout = 60 * time.Second
 )
 
 type Client struct {
@@ -30,8 +36,10 @@ func NewClient(token *oauth2.Token, realmID string, sandbox bool, minorVersion i
 	if sandbox {
 		base = BaseURLSandbox
 	}
+	httpClient := oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(token))
+	httpClient.Timeout = requestTimeout
 	return &Client{
-		httpClient:   oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(token)),
+		httpClient:   httpClient,
 		baseURL:      base,
 		realmID:      realmID,
 		minorVersion: minorVersion,

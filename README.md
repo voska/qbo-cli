@@ -19,8 +19,6 @@ CLI for [QuickBooks Online](https://developer.intuit.com/app/developer/qbo/docs/
 - **Financial reports** — profit & loss, balance sheet, and more with date range filters
 - **Single binary** — install via Homebrew, Scoop, or `go install`
 
-<p align="center"><img src="demo.gif" alt="demo" width="700" /></p>
-
 ```bash
 $ qbo list invoices --where "Balance > '0'" --sandbox --json
 [

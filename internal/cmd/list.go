@@ -44,5 +44,11 @@ func (c *ListCmd) Run(g *Globals) error {
 	if err != nil {
 		return err
 	}
-	return WriteOutput(g.Ctx, result)
+	if err := WriteOutput(g.Ctx, result); err != nil {
+		return err
+	}
+	if output.IsEmpty(result) {
+		return errfmt.Empty()
+	}
+	return nil
 }

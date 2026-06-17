@@ -49,14 +49,14 @@ type Globals struct {
 	Version string
 }
 
-func NewGlobals(cli *CLI) (*Globals, error) {
+func NewGlobals(ctx context.Context, cli *CLI) (*Globals, error) {
 	cfg, err := config.Load()
 	if err != nil {
 		return nil, err
 	}
 	opts := output.NewOptions(cli.JSON, cli.Plain, cli.ResultsOnly, cli.Select)
 	return &Globals{
-		Ctx:     output.WithOptions(context.Background(), opts),
+		Ctx:     output.WithOptions(ctx, opts),
 		Config:  cfg,
 		OutOpts: opts,
 		CLI:     cli,

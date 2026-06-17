@@ -73,6 +73,27 @@ func TestStripMetadata(t *testing.T) {
 	}
 }
 
+func TestIsEmpty(t *testing.T) {
+	cases := []struct {
+		name string
+		raw  string
+		want bool
+	}{
+		{"populated query", `{"QueryResponse":{"Invoice":[{"Id":"1"}],"maxResults":1}}`, false},
+		{"empty query (key omitted)", `{"QueryResponse":{"maxResults":0,"startPosition":1}}`, true},
+		{"single read is not empty", `{"Invoice":{"Id":"1"},"time":"t"}`, false},
+	}
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			var data any
+			_ = json.Unmarshal([]byte(tt.raw), &data)
+			if got := IsEmpty(data); got != tt.want {
+				t.Errorf("IsEmpty = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestStripMetadataRecurringTransaction(t *testing.T) {
 	raw := `{"QueryResponse":{"RecurringTransaction":[{"Invoice":{"Id":"1"}},{"Bill":{"Id":"2"}}],"maxResults":2},"time":"t"}`
 	var data any

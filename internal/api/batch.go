@@ -7,15 +7,11 @@ import (
 	"github.com/voska/qbo-cli/internal/errfmt"
 )
 
-type BatchItem struct {
-	BId       string `json:"bId"`
-	Operation string `json:"operation,omitempty"`
-	Query     string `json:"Query,omitempty"`
-	Entity    string `json:"-"`
-	Body      any    `json:",omitempty"`
-}
-
-func (c *Client) Batch(ctx context.Context, items []BatchItem) (map[string]any, error) {
+// Batch posts a QBO batch request. items are the raw BatchItemRequest entries
+// (each in QBO's native batch format, e.g. {"bId":"1","operation":"create","Invoice":{...}}
+// or {"bId":"2","Query":"select * from Invoice"}), passed through verbatim
+// under the BatchItemRequest envelope.
+func (c *Client) Batch(ctx context.Context, items []json.RawMessage) (map[string]any, error) {
 	payload := map[string]any{
 		"BatchItemRequest": items,
 	}

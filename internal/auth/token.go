@@ -13,6 +13,11 @@ import (
 
 const keyringService = "qbo-cli"
 
+// expiryLeeway treats a token as expired slightly before its real expiry so a
+// request doesn't go out with a token that lapses mid-flight (mirrors the
+// oauth2 library's default expiry delta).
+const expiryLeeway = 30 * time.Second
+
 func tokenDir() string {
 	if d := os.Getenv("QBO_CONFIG_DIR"); d != "" {
 		return filepath.Join(d, "tokens")
@@ -90,5 +95,5 @@ func ListTokenKeys() ([]string, error) {
 }
 
 func IsTokenExpired(token *oauth2.Token) bool {
-	return token.Expiry.Before(time.Now())
+	return token.Expiry.Add(-expiryLeeway).Before(time.Now())
 }

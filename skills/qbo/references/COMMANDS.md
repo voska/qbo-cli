@@ -6,7 +6,7 @@
 |------|-------|-------------|
 | `--json` | `-j` | Output JSON to stdout |
 | `--plain` | `-p` | Output TSV, no color |
-| `--select` | | Project output to fields (top-level keys only) |
+| `--select` | | Project output to fields (dot paths supported) |
 | `--results-only` | | Strip QueryResponse wrapper, return entity array |
 | `--company-id` | | Target company realm ID |
 | `--sandbox` | | Use sandbox environment (sandbox-quickbooks.api.intuit.com) |
@@ -118,8 +118,18 @@ Raw QBO SQL-like query. Combine with `--results-only` for clean arrays.
 
 ### batch
 
+`batch.json` is a JSON array of QBO batch items (each with a `bId` and either an
+operation on an entity or a `Query`):
+
 ```bash
 qbo batch --file batch.json
+```
+
+```json
+[
+  { "bId": "1", "operation": "create", "Invoice": { "...": "..." } },
+  { "bId": "2", "Query": "select * from Invoice" }
+]
 ```
 
 ### cdc

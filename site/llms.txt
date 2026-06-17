@@ -22,7 +22,7 @@ qbo is a free, open-source command-line interface for QuickBooks Online written 
 ## Commands
 
 - `qbo auth login|logout|status|refresh` — OAuth 2.0 authentication
-- `qbo list <entity>` — List entities with optional filters (--where, --orderby, --limit)
+- `qbo list <entity>` — List entities with optional filters (--where, --order-by, --limit)
 - `qbo get <entity> <id>` — Read a single entity by ID
 - `qbo create <entity>` — Create from JSON file or stdin
 - `qbo update <entity> <id>` — Update (full or --sparse)

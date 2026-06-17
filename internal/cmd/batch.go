@@ -17,8 +17,16 @@ func (c *BatchCmd) Run(g *Globals) error {
 		return err
 	}
 
+	var items []json.RawMessage
+	if err := json.Unmarshal(body, &items); err != nil {
+		return errfmt.Wrap(errfmt.ExitUsage, "invalid batch JSON (expected a JSON array of batch items)", err)
+	}
+	if len(items) == 0 {
+		return errfmt.Usage("batch file contains no items")
+	}
+
 	if g.CLI.DryRun {
-		output.Hint("[dry-run] POST /v3/company/{id}/batch")
+		output.Hint("[dry-run] POST /v3/company/{id}/batch (%d items)", len(items))
 		DryRunLog(g.CLI, "POST", "batch", body)
 		return nil
 	}
@@ -28,12 +36,7 @@ func (c *BatchCmd) Run(g *Globals) error {
 		return err
 	}
 
-	var items []map[string]any
-	if err := json.Unmarshal(body, &items); err != nil {
-		return errfmt.Wrap(errfmt.ExitUsage, "invalid batch JSON", err)
-	}
-
-	result, err := client.Batch(g.Ctx, nil)
+	result, err := client.Batch(g.Ctx, items)
 	if err != nil {
 		return err
 	}
