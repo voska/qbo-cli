@@ -54,11 +54,17 @@ type Globals struct {
 }
 
 // keyringCreds lazily loads the app-level OAuth client credentials from the
-// keyring, once per process. A read failure degrades to empty creds so the
+// keyring, once per process. It is only consulted when the corresponding env
+// var is unset (see the resolvers), so env-configured callers never open the
+// keyring. A read failure degrades to empty creds — warned once — so the
 // env/config resolution tiers still apply.
 func (g *Globals) keyringCreds() auth.ClientCreds {
 	g.ccOnce.Do(func() {
-		if c, ok, err := auth.LoadClientCreds(); err == nil && ok {
+		c, ok, err := auth.LoadClientCreds()
+		switch {
+		case err != nil:
+			output.Warn("could not read client credentials from keyring: %v", err)
+		case ok:
 			g.cc = c
 		}
 	})
@@ -66,17 +72,18 @@ func (g *Globals) keyringCreds() auth.ClientCreds {
 }
 
 // ClientID/ClientSecret/RedirectURI resolve credentials across all tiers:
-// env var → keyring → config file.
+// env var → keyring → config file. The keyring closures are lazy: they only
+// run when the env var is unset, so an env-only setup never touches the keyring.
 func (g *Globals) ClientID() string {
-	return g.Config.ResolveClientID(g.keyringCreds().ClientID)
+	return g.Config.ResolveClientID(func() string { return g.keyringCreds().ClientID })
 }
 
 func (g *Globals) ClientSecret() string {
-	return g.Config.ResolveClientSecret(g.keyringCreds().ClientSecret)
+	return g.Config.ResolveClientSecret(func() string { return g.keyringCreds().ClientSecret })
 }
 
 func (g *Globals) RedirectURI() string {
-	return g.Config.ResolveRedirectURI(g.keyringCreds().RedirectURI)
+	return g.Config.ResolveRedirectURI(func() string { return g.keyringCreds().RedirectURI })
 }
 
 func NewGlobals(ctx context.Context, cli *CLI) (*Globals, error) {
