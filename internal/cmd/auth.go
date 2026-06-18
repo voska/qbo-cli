@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"os"
 	"time"
 
 	"github.com/voska/qbo-cli/internal/auth"
@@ -10,10 +11,11 @@ import (
 )
 
 type AuthCmd struct {
-	Login   AuthLoginCmd   `cmd:"" help:"Authenticate with QuickBooks Online."`
-	Logout  AuthLogoutCmd  `cmd:"" help:"Remove stored credentials."`
-	Status  AuthStatusCmd  `cmd:"" help:"Show current auth status."`
-	Refresh AuthRefreshCmd `cmd:"" help:"Force token refresh."`
+	Login     AuthLoginCmd     `cmd:"" help:"Authenticate with QuickBooks Online."`
+	Logout    AuthLogoutCmd    `cmd:"" help:"Remove stored credentials."`
+	Status    AuthStatusCmd    `cmd:"" help:"Show current auth status."`
+	Refresh   AuthRefreshCmd   `cmd:"" help:"Force token refresh."`
+	SetClient AuthSetClientCmd `cmd:"" name:"set-client" help:"Store OAuth client credentials in the keyring."`
 }
 
 type AuthLoginCmd struct {
@@ -22,16 +24,19 @@ type AuthLoginCmd struct {
 }
 
 func (c *AuthLoginCmd) Run(g *Globals) error {
-	clientID := g.Config.ResolveClientID()
-	clientSecret := g.Config.ResolveClientSecret()
+	clientID := g.ClientID()
+	clientSecret := g.ClientSecret()
 	if clientID == "" || clientSecret == "" {
-		return errfmt.Config("set QBO_CLIENT_ID and QBO_CLIENT_SECRET before logging in")
+		return errfmt.Config("set client credentials first — run: qbo auth set-client (or set QBO_CLIENT_ID and QBO_CLIENT_SECRET)")
 	}
 
 	redirectURI := c.RedirectURI
 	if redirectURI == "" {
-		redirectURI = g.Config.ResolveRedirectURI()
+		redirectURI = g.RedirectURI()
 	}
+	// storedRedirect stays empty when none was configured, so we don't lock the
+	// localhost default into the keyring entry.
+	storedRedirect := redirectURI
 	if redirectURI == "" {
 		redirectURI = auth.DefaultRedirectURI()
 	}
@@ -60,6 +65,16 @@ func (c *AuthLoginCmd) Run(g *Globals) error {
 	}
 	if err := g.Config.Save(); err != nil {
 		output.Warn("could not save config: %v", err)
+	}
+
+	// Persist the client credentials used so future invocations resolve them
+	// from the keyring without QBO_CLIENT_ID/SECRET in the environment.
+	if err := auth.StoreClientCreds(auth.ClientCreds{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		RedirectURI:  storedRedirect,
+	}); err != nil {
+		output.Warn("authenticated, but could not save client credentials to keyring: %v", err)
 	}
 
 	output.Success("authenticated for company %s", result.RealmID)
@@ -102,7 +117,26 @@ func (c *AuthStatusCmd) Run(g *Globals) error {
 		status["company_name"] = co.CompanyName
 		status["environment"] = co.Environment
 	}
+	status["client_credentials"] = map[string]any{
+		"configured": g.ClientID() != "" && g.ClientSecret() != "",
+		"source":     clientCredsSource(g),
+	}
 	return WriteOutput(g.Ctx, status)
+}
+
+// clientCredsSource reports which tier supplied the client credentials, for
+// debugging "why can't this agent see QBO" situations.
+func clientCredsSource(g *Globals) string {
+	switch {
+	case os.Getenv("QBO_CLIENT_ID") != "":
+		return "env"
+	case g.keyringCreds().ClientID != "":
+		return "keyring"
+	case g.Config.ClientID != "":
+		return "config"
+	default:
+		return "none"
+	}
 }
 
 type AuthRefreshCmd struct{}
@@ -116,10 +150,10 @@ func (c *AuthRefreshCmd) Run(g *Globals) error {
 	if err != nil {
 		return err
 	}
-	clientID := g.Config.ResolveClientID()
-	clientSecret := g.Config.ResolveClientSecret()
+	clientID := g.ClientID()
+	clientSecret := g.ClientSecret()
 	if clientID == "" || clientSecret == "" {
-		return errfmt.Config("QBO_CLIENT_ID and QBO_CLIENT_SECRET required")
+		return errfmt.Config("client credentials required — run: qbo auth set-client (or set QBO_CLIENT_ID and QBO_CLIENT_SECRET)")
 	}
 	newToken, err := auth.RefreshAccessToken(g.Ctx, clientID, clientSecret, token)
 	if err != nil {
@@ -137,4 +171,44 @@ func resolveEnv(cli *CLI) string {
 		return config.EnvSandbox
 	}
 	return config.EnvProduction
+}
+
+type AuthSetClientCmd struct {
+	ClientID     string `name:"client-id" env:"QBO_CLIENT_ID" help:"OAuth client ID (falls back to QBO_CLIENT_ID)."`
+	ClientSecret string `name:"client-secret" env:"QBO_CLIENT_SECRET" help:"OAuth client secret (falls back to QBO_CLIENT_SECRET)."`
+	RedirectURI  string `name:"redirect-uri" env:"QBO_REDIRECT_URI" help:"Optional OAuth redirect URI."`
+	Clear        bool   `help:"Remove stored client credentials from the keyring."`
+}
+
+func (c *AuthSetClientCmd) Run(g *Globals) error {
+	if c.Clear {
+		if g.CLI.DryRun {
+			output.Hint("[dry-run] would remove client credentials from keyring")
+			return nil
+		}
+		if err := auth.DeleteClientCreds(); err != nil {
+			return err
+		}
+		output.Success("client credentials removed from keyring")
+		return nil
+	}
+
+	if c.ClientID == "" || c.ClientSecret == "" {
+		return errfmt.Config("provide --client-id and --client-secret (or set QBO_CLIENT_ID and QBO_CLIENT_SECRET)")
+	}
+
+	if g.CLI.DryRun {
+		output.Hint("[dry-run] would store client credentials in keyring")
+		return nil
+	}
+
+	if err := auth.StoreClientCreds(auth.ClientCreds{
+		ClientID:     c.ClientID,
+		ClientSecret: c.ClientSecret,
+		RedirectURI:  c.RedirectURI,
+	}); err != nil {
+		return err
+	}
+	output.Success("client credentials stored in keyring")
+	return nil
 }

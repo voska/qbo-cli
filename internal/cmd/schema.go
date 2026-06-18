@@ -51,6 +51,7 @@ func fullSchema(version string) map[string]any {
 					{"name": "logout", "help": "Remove stored credentials"},
 					{"name": "status", "help": "Show current auth status"},
 					{"name": "refresh", "help": "Force token refresh"},
+					{"name": "set-client", "help": "Store OAuth client credentials in the keyring", "flags": []string{"--client-id", "--client-secret", "--redirect-uri", "--clear"}},
 				},
 			},
 			{

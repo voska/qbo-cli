@@ -45,8 +45,9 @@ See [Intuit's OAuth 2.0 guide](https://developer.intuit.com/app/developer/qbo/do
 ## Setup
 
 ```bash
-export QBO_CLIENT_ID=your_client_id
-export QBO_CLIENT_SECRET=your_client_secret
+# Store app-level OAuth client credentials in the system keychain (one time).
+# After this, no QBO_CLIENT_ID/SECRET env vars are needed for any command.
+qbo auth set-client --client-id your_client_id --client-secret your_client_secret
 
 # Sandbox — uses localhost callback automatically
 qbo auth login --sandbox
@@ -64,7 +65,7 @@ qbo auth login --manual
 
 For non-localhost redirect URIs, `qbo auth login` prints the auth URL and prompts you to paste the callback URL after authorizing.
 
-Tokens are stored in the system keychain (macOS Keychain, Windows Credential Manager) with file-based fallback at `~/.config/qbo/tokens/`.
+Tokens **and** client credentials (once `qbo auth set-client` runs, or after the first `qbo auth login`) are stored in the system keychain (macOS Keychain, Windows Credential Manager) with file-based fallback at `~/.config/qbo/tokens/`. Credentials resolve in priority order: env var (`QBO_CLIENT_ID`/`QBO_CLIENT_SECRET`) → keychain → `config.json`, so env vars still work and override the keychain when set. On headless hosts that can't reach the login keychain, set `QBO_KEYRING_BACKEND=file` to use the encrypted-file backend instead.
 
 ### Verify
 

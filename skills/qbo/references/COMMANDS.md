@@ -41,9 +41,11 @@ All QBO responses are wrapped. Use `--json` for parsing.
 ### auth
 
 ```bash
+qbo auth set-client --client-id ID --client-secret SECRET [--redirect-uri URI]  # Store client creds in keychain
+qbo auth set-client --clear   # Remove stored client creds from keychain
 qbo auth login [--manual] [--redirect-uri URI]  # OAuth flow
-qbo auth logout               # Remove stored credentials
-qbo auth status               # Show token status and company
+qbo auth logout               # Remove stored token
+qbo auth status               # Show token status, company, and client-cred source
 qbo auth refresh              # Force token refresh
 ```
 
@@ -196,8 +198,10 @@ and auto-posts on a schedule. Use the standard `list`/`get`/`create`/`update`/`d
 
 | Variable | Description |
 |----------|-------------|
-| `QBO_CLIENT_ID` | OAuth client ID (required) |
-| `QBO_CLIENT_SECRET` | OAuth client secret (required) |
+| `QBO_CLIENT_ID` | OAuth client ID (overrides keychain; or use `qbo auth set-client`) |
+| `QBO_CLIENT_SECRET` | OAuth client secret (overrides keychain; or use `qbo auth set-client`) |
 | `QBO_COMPANY_ID` | Default company realm ID |
+| `QBO_REDIRECT_URI` | OAuth redirect URI (overrides keychain/config) |
 | `QBO_AUTO_JSON` | Set to `1` for auto-JSON when stdout is piped |
 | `QBO_CONFIG_DIR` | Override config directory (default: `~/.config/qbo/`) |
+| `QBO_KEYRING_BACKEND` | Set to `file` to force the encrypted-file backend (headless hosts) |

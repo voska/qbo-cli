@@ -76,8 +76,9 @@ sudo dpkg -i qbo_linux_amd64.deb
 ## Quick Start
 
 ```bash
-export QBO_CLIENT_ID=your_client_id
-export QBO_CLIENT_SECRET=your_client_secret
+# Store app-level OAuth client credentials in the system keychain (one time).
+# Env vars (QBO_CLIENT_ID/QBO_CLIENT_SECRET) still work and override this.
+qbo auth set-client --client-id your_client_id --client-secret your_client_secret
 
 # Authenticate (sandbox)
 qbo auth login --sandbox

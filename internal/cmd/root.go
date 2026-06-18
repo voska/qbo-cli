@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"os"
+	"sync"
 
 	"github.com/voska/qbo-cli/internal/api"
 	"github.com/voska/qbo-cli/internal/auth"
@@ -47,6 +48,35 @@ type Globals struct {
 	OutOpts output.Options
 	CLI     *CLI
 	Version string
+
+	ccOnce sync.Once
+	cc     auth.ClientCreds
+}
+
+// keyringCreds lazily loads the app-level OAuth client credentials from the
+// keyring, once per process. A read failure degrades to empty creds so the
+// env/config resolution tiers still apply.
+func (g *Globals) keyringCreds() auth.ClientCreds {
+	g.ccOnce.Do(func() {
+		if c, ok, err := auth.LoadClientCreds(); err == nil && ok {
+			g.cc = c
+		}
+	})
+	return g.cc
+}
+
+// ClientID/ClientSecret/RedirectURI resolve credentials across all tiers:
+// env var → keyring → config file.
+func (g *Globals) ClientID() string {
+	return g.Config.ResolveClientID(g.keyringCreds().ClientID)
+}
+
+func (g *Globals) ClientSecret() string {
+	return g.Config.ResolveClientSecret(g.keyringCreds().ClientSecret)
+}
+
+func (g *Globals) RedirectURI() string {
+	return g.Config.ResolveRedirectURI(g.keyringCreds().RedirectURI)
 }
 
 func NewGlobals(ctx context.Context, cli *CLI) (*Globals, error) {
@@ -89,10 +119,10 @@ func (g *Globals) loadAndRefreshToken(realmID string) (*oauth2.Token, error) {
 		return nil, err
 	}
 	if auth.IsTokenExpired(token) {
-		clientID := g.Config.ResolveClientID()
-		clientSecret := g.Config.ResolveClientSecret()
+		clientID := g.ClientID()
+		clientSecret := g.ClientSecret()
 		if clientID == "" || clientSecret == "" {
-			return nil, errfmt.Config("QBO_CLIENT_ID and QBO_CLIENT_SECRET required for token refresh")
+			return nil, errfmt.Config("client credentials required for token refresh — run: qbo auth set-client (or set QBO_CLIENT_ID and QBO_CLIENT_SECRET)")
 		}
 		newToken, err := auth.RefreshAccessToken(g.Ctx, clientID, clientSecret, token)
 		if err != nil {

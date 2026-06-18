@@ -34,13 +34,20 @@ func openKeyring() (keyring.Keyring, error) {
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return nil, errfmt.Wrap(errfmt.ExitConfig, "cannot create token directory", err)
 	}
-	return keyring.Open(keyring.Config{
+	cfg := keyring.Config{
 		ServiceName:                    keyringService,
 		KeychainTrustApplication:       true,
 		KeychainAccessibleWhenUnlocked: true,
 		FileDir:                        dir,
 		FilePasswordFunc:               func(_ string) (string, error) { return "", nil },
-	})
+	}
+	// QBO_KEYRING_BACKEND=file forces the encrypted-file backend instead of the
+	// OS keychain — useful on headless hosts (e.g. a background daemon that
+	// can't reach the login keychain) and for hermetic tests.
+	if os.Getenv("QBO_KEYRING_BACKEND") == "file" {
+		cfg.AllowedBackends = []keyring.BackendType{keyring.FileBackend}
+	}
+	return keyring.Open(cfg)
 }
 
 func StoreToken(realmID string, token *oauth2.Token) error {
@@ -91,7 +98,14 @@ func ListTokenKeys() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	return keys, nil
+	realms := make([]string, 0, len(keys))
+	for _, k := range keys {
+		if k == clientCredsKey {
+			continue
+		}
+		realms = append(realms, k)
+	}
+	return realms, nil
 }
 
 func IsTokenExpired(token *oauth2.Token) bool {
