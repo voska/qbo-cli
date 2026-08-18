@@ -2,6 +2,27 @@
 name: qbo
 description: Queries, creates, updates, and manages QuickBooks Online data via the qbo CLI. Use when working with QBO entities (invoices, customers, bills, payments, vendors, accounts, items, estimates, attachables, recurring transactions), running reports, or setting up install, auth, sandbox, and company switching.
 allowed-tools: Bash(qbo *)
+metadata:
+  openclaw:
+    requires:
+      bins:
+        - qbo
+    install:
+      - id: brew
+        kind: brew
+        formula: voska/tap/qbo
+        bins:
+          - qbo
+        label: Install QBO CLI with Homebrew
+        os:
+          - darwin
+          - linux
+      - id: go
+        kind: go
+        module: github.com/voska/qbo-cli/cmd/qbo@latest
+        bins:
+          - qbo
+        label: Install QBO CLI with Go
 ---
 
 # qbo — QuickBooks Online CLI
