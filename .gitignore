@@ -11,3 +11,7 @@ mise.toml
 *.db
 .beads-credential-key
 .beads/proxieddb/
+
+# Claude Code local/runtime state
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
