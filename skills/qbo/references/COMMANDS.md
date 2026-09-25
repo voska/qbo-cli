@@ -170,6 +170,16 @@ qbo download <id> [-o path] [--url]
 
 `--url` prints the temporary download URL instead of saving the file.
 
+### pdf
+
+```bash
+qbo pdf <entity> <id> [-o path]
+```
+
+Saves a transaction as the PDF QuickBooks renders — the same document the customer receives by email.
+Supported entities: `invoice`, `estimate`, `salesreceipt`, `creditmemo`, `purchaseorder`. `<id>` is the
+transaction Id, not its document number. Defaults to `<entity>-<id>.pdf`.
+
 ### schema
 
 ```bash
