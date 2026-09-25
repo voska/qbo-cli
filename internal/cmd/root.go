@@ -38,6 +38,7 @@ type CLI struct {
 	Company     CompanyCmd   `cmd:"" help:"Company info and switching."`
 	Attach      AttachCmd    `cmd:"" help:"Upload a file attachment to an entity."`
 	Download    DownloadCmd  `cmd:"" help:"Download an attachment file."`
+	PDF         PDFCmd       `cmd:"" name:"pdf" help:"Save a transaction as the PDF QuickBooks renders."`
 	Schema      SchemaCmd    `cmd:"" help:"Dump CLI schema as JSON for agent introspection."`
 	ExitCodes   ExitCodesCmd `cmd:"" name:"exit-codes" help:"Print exit code table."`
 }

@@ -158,6 +158,12 @@ qbo list attachable --where "AttachableRef.EntityRef.value = '123'" --json --res
 qbo download <id>
 ```
 
+## Transaction PDFs
+
+```bash
+qbo pdf invoice 123 -o invoice-123.pdf   # also estimate, salesreceipt, creditmemo, purchaseorder
+```
+
 ## Recurring Transactions
 
 Templates that auto-post transactions on a schedule (e.g. monthly amortization).
