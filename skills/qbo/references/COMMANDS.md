@@ -176,8 +176,9 @@ qbo download <id> [-o path] [--url]
 qbo pdf <entity> <id> [-o path]
 ```
 
-Saves a transaction as the PDF QuickBooks renders — the same document the customer receives by email.
-Supported entities: `invoice`, `estimate`, `salesreceipt`, `creditmemo`, `purchaseorder`. `<id>` is the
+Saves a transaction as the PDF the QuickBooks API renders. This can differ from what the QuickBooks web UI
+prints or emails: the API has been seen to combine invoice lines that share a description into one summed
+line, where the UI lists them separately. Supported entities: `invoice`, `estimate`, `salesreceipt`, `creditmemo`, `purchaseorder`. `<id>` is the
 transaction Id, not its document number. Defaults to `<entity>-<id>.pdf`.
 
 ### schema

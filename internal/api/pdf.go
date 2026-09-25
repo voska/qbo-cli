@@ -27,8 +27,11 @@ var pdfEntities = map[string]bool{
 // SupportsPDF reports whether QuickBooks can render the entity endpoint as a PDF.
 func SupportsPDF(endpoint string) bool { return pdfEntities[endpoint] }
 
-// PDF fetches a transaction as the PDF QuickBooks renders for it — the same
-// document the customer receives when it is emailed from QuickBooks.
+// PDF fetches a transaction as the PDF the QuickBooks API renders for it.
+//
+// This is the API's rendering, not necessarily the one the QuickBooks web UI
+// prints or emails: the API has been observed to combine invoice lines that
+// share a description into one summed line, where the UI lists them apart.
 //
 // The endpoint must be asked for application/pdf explicitly: with the
 // application/json Accept header every other call sends, QuickBooks answers
