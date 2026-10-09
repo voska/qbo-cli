@@ -35,6 +35,7 @@ func fullSchema(version string) map[string]any {
 			"creatable": e.Creatable,
 			"updatable": e.Updatable,
 			"deletable": e.Deletable,
+			"voidable":  e.VoidStyle != "",
 			"read_only": e.ReadOnly,
 		})
 	}
@@ -81,6 +82,12 @@ func fullSchema(version string) map[string]any {
 				"name": "delete",
 				"help": "Delete an entity by ID",
 				"args": []string{"entity", "id"},
+			},
+			{
+				"name":  "void",
+				"help":  "Void a transaction by ID, preserving its audit trail",
+				"args":  []string{"entity", "id"},
+				"flags": []string{"--sync-token"},
 			},
 			{
 				"name": "query",

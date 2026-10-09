@@ -94,7 +94,7 @@ QBO wraps all responses. Know the shapes:
 - **`list`/`query`** returns `{"QueryResponse": {"Invoice": [...], "startPosition": 1, ...}}`.
   Use `--results-only` to unwrap to just the array.
 - **`get`** returns `{"Invoice": {...}}`. Use jq to drill in: `qbo get invoice 123 --json | jq '.Invoice'`
-- **`create`/`update`** returns the same wrapper as `get`.
+- **`create`/`update`/`void`** returns the same wrapper as `get`.
 - **`report`** returns `{"Header": {...}, "Rows": {...}}`.
 
 Always use `--json` when parsing output programmatically.
@@ -158,6 +158,23 @@ qbo list attachable --where "AttachableRef.EntityRef.value = '123'" --json --res
 qbo download <id>
 ```
 
+## Voiding Transactions
+
+Void Invoice, Payment, SalesReceipt, or BillPayment to zero amounts while keeping
+the document number, date, and audit trail. A void can't be undone.
+
+```bash
+qbo void invoice 145 --dry-run
+qbo void invoice 145 --force --no-input --sandbox --json
+qbo void payment 200 --sync-token 3 --force --no-input --sandbox --json
+```
+
+The command reads the current SyncToken before posting; `--sync-token` pins the
+expected value and fails without posting on a mismatch. Already-void records
+(`TotalAmt` zero and `PrivateNote` starting with `Voided`) return with a hint and
+no POST. Dry runs make no API calls; a pinned token includes the exact body.
+Use `--force` with `--no-input`; otherwise the command prompts for confirmation.
+
 ## Recurring Transactions
 
 Templates that auto-post transactions on a schedule (e.g. monthly amortization).
@@ -176,6 +193,7 @@ qbo delete recurringtransaction <id>   # reads + echoes the full object for you
 ```bash
 qbo schema --json             # Full CLI tree, all entities, all flags
 qbo schema get --json         # Schema for a specific command
+qbo schema void --json        # Void arguments and --sync-token flag
 qbo exit-codes --json         # Exit codes as JSON
 ```
 
