@@ -34,6 +34,7 @@ All QBO responses are wrapped. Use `--json` for parsing.
 | `get` | `{"Entity": {...}}` | Pipe through `jq '.Entity'` |
 | `create`, `update` | `{"Entity": {...}}` | Same as `get` |
 | `delete` | `{"Entity": {"Id": "...", "status": "Deleted"}}` | |
+| `void` | `{"Entity": {...}}` | `TotalAmt` is zero; `PrivateNote` starts with `Voided` |
 | `report` | `{"Header": {...}, "Rows": {...}}` | Nested row structure |
 
 ## Commands
@@ -110,6 +111,39 @@ qbo delete <entity> <id> [--force]
 
 Prompts for confirmation unless `--force` is set.
 
+### void
+
+```bash
+qbo void <entity> <id> [--sync-token TOKEN] [--force]
+```
+
+Only Invoice, Payment, SalesReceipt, and BillPayment can be voided. QBO zeroes
+amounts while preserving the document number, date, and audit trail. Voiding
+can't be undone. The command prompts unless `--force` is set; `--no-input`
+without `--force` exits 2 before any API call. Other entities also exit 2.
+
+| Entity | POST query | Body |
+|--------|------------|------|
+| Invoice | `operation=void` | `Id`, `SyncToken` |
+| Payment, SalesReceipt, BillPayment | `operation=update&include=void` | `Id`, `SyncToken`, `sparse: true` |
+
+The current SyncToken is read with GET before POST. `--sync-token` pins the
+expected token; a mismatch exits 1 without posting, including on an already-void
+record. Without a mismatched pin, `TotalAmt` zero plus a `PrivateNote` starting
+with `Voided` returns the current entity with a stderr hint and no POST.
+The returned entity must show the void markers, or the command exits 1 with
+an unverified-result error.
+
+```bash
+qbo void invoice 145 --dry-run
+qbo void bill-payment 200 --sync-token 3 --dry-run
+qbo void invoice 145 --force --no-input --sandbox --json | jq '.Invoice'
+```
+
+`--dry-run` makes no API calls and prints the GET-then-POST plan to stderr. Without
+a pin, it says the SyncToken will be read at execution. With `--sync-token`, it
+prints the exact POST body. Normal output preserves the QBO response wrapper.
+
 ### query
 
 ```bash
@@ -175,6 +209,7 @@ qbo download <id> [-o path] [--url]
 ```bash
 qbo schema --json             # Full CLI tree with all entities
 qbo schema get --json         # Schema for a specific command
+qbo schema void --json        # Void arguments and --sync-token flag
 ```
 
 ### exit-codes
