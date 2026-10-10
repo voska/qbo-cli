@@ -132,6 +132,12 @@ func fullSchema(version string) map[string]any {
 				"flags": []string{"--output", "--url"},
 			},
 			{
+				"name":  "pdf",
+				"help":  "Save a transaction as the PDF QuickBooks renders.",
+				"args":  []string{"entity", "id"},
+				"flags": []string{"--output"},
+			},
+			{
 				"name": "schema",
 				"help": "Dump CLI schema as JSON for agent introspection",
 				"args": []string{"command?"},
