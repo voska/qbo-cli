@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/voska/qbo-cli/internal/api"
+	"github.com/voska/qbo-cli/internal/errfmt"
 )
 
 type SchemaCmd struct {
@@ -12,7 +13,11 @@ type SchemaCmd struct {
 
 func (c *SchemaCmd) Run(g *Globals) error {
 	if c.Command != "" {
-		return WriteOutput(g.Ctx, commandSchema(c.Command, g.Version))
+		schema, err := commandSchema(c.Command, g.Version)
+		if err != nil {
+			return err
+		}
+		return WriteOutput(g.Ctx, schema)
 	}
 	return WriteOutput(g.Ctx, fullSchema(g.Version))
 }
@@ -164,16 +169,16 @@ func fullSchema(version string) map[string]any {
 	}
 }
 
-func commandSchema(name, version string) map[string]any {
+func commandSchema(name, version string) (map[string]any, error) {
 	schema := fullSchema(version)
 	commands, ok := schema["commands"].([]map[string]any)
 	if !ok {
-		return map[string]any{"error": "command not found: " + name}
+		return nil, errfmt.Usage("command not found: " + name)
 	}
 	for _, cmd := range commands {
 		if cmd["name"] == name {
-			return cmd
+			return cmd, nil
 		}
 	}
-	return map[string]any{"error": "command not found: " + name}
+	return nil, errfmt.Usage("command not found: " + name)
 }
