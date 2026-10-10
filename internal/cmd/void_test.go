@@ -206,7 +206,10 @@ func TestVoidCommandOutput(t *testing.T) {
 }
 
 func TestVoidSchema(t *testing.T) {
-	schema := commandSchema("void", "test")
+	schema, err := commandSchema("void", "test")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if schema["name"] != "void" {
 		t.Fatalf("void is missing from schema: %v", schema)
 	}

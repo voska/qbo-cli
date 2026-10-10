@@ -52,7 +52,10 @@ func TestPDFSchemaMatchesCommand(t *testing.T) {
 	if command == nil {
 		t.Fatal("pdf is missing from the command model")
 	}
-	schema := commandSchema("pdf", "test")
+	schema, err := commandSchema("pdf", "test")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if schema["name"] != command.Name || schema["help"] != command.Help {
 		t.Fatalf("pdf schema does not match the command: %v", schema)
 	}
