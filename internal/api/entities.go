@@ -2,6 +2,13 @@ package api
 
 import "strings"
 
+type VoidStyle string
+
+const (
+	VoidOperation    VoidStyle = "operation=void"
+	VoidSparseUpdate VoidStyle = "operation=update&include=void"
+)
+
 type EntityInfo struct {
 	Name      string
 	Endpoint  string
@@ -10,6 +17,7 @@ type EntityInfo struct {
 	Updatable bool
 	Deletable bool
 	ReadOnly  bool
+	VoidStyle VoidStyle
 	// DeleteNeedsFullObject marks entities that cannot be deleted with the usual
 	// {Id, SyncToken} body and instead require the full object echoed back
 	// (read-then-delete). RecurringTransaction is the only such entity.
@@ -20,7 +28,7 @@ var entities = map[string]EntityInfo{
 	"account":              {Name: "Account", Endpoint: "account", Queryable: true, Creatable: true, Updatable: true},
 	"attachable":           {Name: "Attachable", Endpoint: "attachable", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
 	"bill":                 {Name: "Bill", Endpoint: "bill", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
-	"billpayment":          {Name: "BillPayment", Endpoint: "billpayment", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
+	"billpayment":          {Name: "BillPayment", Endpoint: "billpayment", Queryable: true, Creatable: true, Updatable: true, Deletable: true, VoidStyle: VoidSparseUpdate},
 	"budget":               {Name: "Budget", Endpoint: "budget", Queryable: true},
 	"class":                {Name: "Class", Endpoint: "class", Queryable: true, Creatable: true, Updatable: true},
 	"companyinfo":          {Name: "CompanyInfo", Endpoint: "companyinfo", Queryable: true, ReadOnly: true},
@@ -30,17 +38,17 @@ var entities = map[string]EntityInfo{
 	"deposit":              {Name: "Deposit", Endpoint: "deposit", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
 	"employee":             {Name: "Employee", Endpoint: "employee", Queryable: true, Creatable: true, Updatable: true},
 	"estimate":             {Name: "Estimate", Endpoint: "estimate", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
-	"invoice":              {Name: "Invoice", Endpoint: "invoice", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
+	"invoice":              {Name: "Invoice", Endpoint: "invoice", Queryable: true, Creatable: true, Updatable: true, Deletable: true, VoidStyle: VoidOperation},
 	"item":                 {Name: "Item", Endpoint: "item", Queryable: true, Creatable: true, Updatable: true},
 	"journalentry":         {Name: "JournalEntry", Endpoint: "journalentry", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
-	"payment":              {Name: "Payment", Endpoint: "payment", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
+	"payment":              {Name: "Payment", Endpoint: "payment", Queryable: true, Creatable: true, Updatable: true, Deletable: true, VoidStyle: VoidSparseUpdate},
 	"paymentmethod":        {Name: "PaymentMethod", Endpoint: "paymentmethod", Queryable: true, Creatable: true, Updatable: true},
 	"preferences":          {Name: "Preferences", Endpoint: "preferences", Queryable: true, Updatable: true},
 	"purchase":             {Name: "Purchase", Endpoint: "purchase", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
 	"purchaseorder":        {Name: "PurchaseOrder", Endpoint: "purchaseorder", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
 	"recurringtransaction": {Name: "RecurringTransaction", Endpoint: "recurringtransaction", Queryable: true, Creatable: true, Updatable: true, Deletable: true, DeleteNeedsFullObject: true},
 	"refundreceipt":        {Name: "RefundReceipt", Endpoint: "refundreceipt", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
-	"salesreceipt":         {Name: "SalesReceipt", Endpoint: "salesreceipt", Queryable: true, Creatable: true, Updatable: true, Deletable: true},
+	"salesreceipt":         {Name: "SalesReceipt", Endpoint: "salesreceipt", Queryable: true, Creatable: true, Updatable: true, Deletable: true, VoidStyle: VoidSparseUpdate},
 	"taxcode":              {Name: "TaxCode", Endpoint: "taxcode", Queryable: true, ReadOnly: true},
 	"taxrate":              {Name: "TaxRate", Endpoint: "taxrate", Queryable: true, ReadOnly: true},
 	"term":                 {Name: "Term", Endpoint: "term", Queryable: true, Creatable: true, Updatable: true},

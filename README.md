@@ -137,6 +137,7 @@ Uses the [QuickBooks Online Accounting API](https://developer.intuit.com/app/dev
 | `create <entity> --data <json>` | Create an entity from JSON |
 | `update <entity> --data <json>` | Update an entity |
 | `delete <entity> <id>` | Delete an entity by ID |
+| `void <entity> <id>` | Zero a transaction's amounts and preserve its audit trail |
 | `query "<sql>"` | Raw QBO query |
 | `report <type>` | Financial reports (profit-and-loss, balance-sheet, etc.) |
 | `batch --file <path>` | Batch operations from file |
@@ -146,6 +147,25 @@ Uses the [QuickBooks Online Accounting API](https://developer.intuit.com/app/dev
 | `exit-codes` | Print exit code reference |
 
 All commands support `--dry-run`, `--no-input`, and `--sandbox`.
+
+### Void a transaction
+
+`qbo void` supports Invoice, Payment, SalesReceipt, and BillPayment. QBO zeroes
+the amounts and preserves the document number, date, and audit trail. A void
+can't be undone. The command prompts for confirmation unless `--force` is set;
+`--no-input` requires `--force`.
+
+```bash
+qbo void invoice 145 --dry-run
+qbo void invoice 145 --force --no-input --sandbox --json
+qbo void payment 200 --sync-token 3 --force --no-input --sandbox --json
+```
+
+The command reads the current SyncToken before posting. `--sync-token` pins the
+expected token and fails without posting if it differs. Records with `TotalAmt`
+zero and `PrivateNote` starting with `Voided` return successfully with a hint and
+no POST. Output retains QBO's entity wrapper. Dry runs make no API calls and
+show the exact request body when `--sync-token` is supplied.
 
 ## Output Modes
 
