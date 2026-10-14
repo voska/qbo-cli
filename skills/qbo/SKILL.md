@@ -1,6 +1,7 @@
 ---
 name: qbo
-description: Queries, creates, updates, and manages QuickBooks Online data via the qbo CLI. Use when working with QBO entities (invoices, customers, bills, payments, vendors, accounts, items, estimates, attachables, recurring transactions), running reports, or setting up install, auth, sandbox, and company switching.
+description: >-
+  Use when working with QuickBooks Online — invoices, customers, bills, payments, vendors, accounts, items, estimates, attachments, recurring transactions, reports, or qbo CLI auth and setup. Not for other accounting systems.
 allowed-tools: Bash(qbo *)
 ---
 
