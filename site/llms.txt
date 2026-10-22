@@ -21,18 +21,23 @@ qbo is a free, open-source command-line interface for QuickBooks Online written 
 
 ## Commands
 
-- `qbo auth login|logout|status|refresh` — OAuth 2.0 authentication
+- `qbo auth login|logout|status|refresh|set-client` — OAuth 2.0 authentication
 - `qbo list <entity>` — List entities with optional filters (--where, --order-by, --limit)
 - `qbo get <entity> <id>` — Read a single entity by ID
 - `qbo create <entity>` — Create from JSON file or stdin
 - `qbo update <entity> <id>` — Update (full or --sparse)
 - `qbo delete <entity> <id>` — Delete with confirmation (--force to skip)
+- `qbo send invoice <id> [--to <email>]` — Email a third party (invoices only); --to replaces BillEmail.Address. Invoice Cc/Bcc settings still apply.
+- `qbo void <entity> <id>` — Zero an Invoice, Payment, SalesReceipt or BillPayment while preserving its audit trail
 - `qbo query "<sql>"` — Raw QuickBooks query language
 - `qbo batch --file` — Batch operations from JSON file
 - `qbo cdc --entities --since` — Change data capture
 - `qbo report <type>` — Financial reports (profit-and-loss, balance-sheet, etc.)
 - `qbo company info|list|switch` — Company management
-- `qbo schema` — CLI schema as JSON for agent introspection
+- `qbo attach [<entity> <id>] <file>` — Upload a file, optionally linked to an entity
+- `qbo download <id>` — Download an attachment (-o to choose a path, --url for its temporary URL)
+- `qbo pdf <entity> <id>` — Save a transaction as the PDF QuickBooks renders (-o to choose a path)
+- `qbo schema [<command>]` — CLI schema as JSON for agent introspection
 - `qbo exit-codes` — Exit code reference
 
 ## Exit Codes
@@ -47,6 +52,12 @@ qbo is a free, open-source command-line interface for QuickBooks Online written 
 - 7: rate_limited
 - 8: retryable (transient error)
 - 10: config_error
+
+`qbo send` never exits 7 or 8. HTTP 429, 5xx, timeout, transport failure or an
+unverified response exit 1. Never automatically retry a send: read the invoice
+with `qbo get invoice <id> --json` and inspect `EmailStatus` and `DeliveryInfo`
+before sending again. A successful response records QuickBooks' send, not inbox
+delivery.
 
 ## Agent Integration
 
