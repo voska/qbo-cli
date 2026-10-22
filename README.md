@@ -137,6 +137,7 @@ Uses the [QuickBooks Online Accounting API](https://developer.intuit.com/app/dev
 | `create <entity> --data <json>` | Create an entity from JSON |
 | `update <entity> --data <json>` | Update an entity |
 | `delete <entity> <id>` | Delete an entity by ID |
+| `send invoice <id> [--to <email>]` | Email an invoice (optionally replacing its billing email) |
 | `void <entity> <id>` | Zero a transaction's amounts and preserve its audit trail |
 | `query "<sql>"` | Raw QBO query |
 | `report <type>` | Financial reports (profit-and-loss, balance-sheet, etc.) |
@@ -147,6 +148,40 @@ Uses the [QuickBooks Online Accounting API](https://developer.intuit.com/app/dev
 | `exit-codes` | Print exit code reference |
 
 All commands support `--dry-run`, `--no-input`, and `--sandbox`.
+
+### Email an invoice
+
+`qbo send invoice <id> [--to <email>]` emails a third party. Without `--to`,
+QuickBooks uses the invoice's stored `BillEmail`. With `--to`, it sends to that
+address **and replaces the invoice's `BillEmail.Address`**. Only invoices are
+supported. Use the numeric `Id`, not the document number. Invoice Cc/Bcc settings
+still apply; `--to` replaces only the main billing email.
+
+```bash
+qbo send invoice 145 --dry-run
+qbo send invoice 145 --to 'a+b@example.com' --dry-run
+qbo send invoice 145 --force --no-input --sandbox --json
+```
+
+Dry runs print the POST and recipient to stderr without authentication or HTTP.
+The command prompts for confirmation unless `--force` is set. Noninteractive
+stdin and `--no-input` both require `--force`.
+
+**Never automatically retry a send.** Each invocation makes at most one send
+POST, without backoff or redirects. A 429, 5xx, timeout, transport failure, or
+unverified response exits **1**, never the retryable codes 7 or 8. Read the
+invoice's `EmailStatus` and `DeliveryInfo` before deciding to send again:
+
+```bash
+qbo get invoice 145 --json | jq '.Invoice | {EmailStatus, DeliveryInfo}'
+```
+
+401, 403 and 404 retain exit codes 4, 6 and 5. Successful output requires the
+returned invoice to show `EmailSent`, a delivery timestamp and its recipient;
+this is QuickBooks' send record, not proof of arrival in the recipient's inbox.
+Human and plain output show `Id`, `DocNumber`, `EmailStatus`, `BillEmail.Address`
+and `DeliveryInfo.DeliveryTime`. JSON preserves the complete QBO response,
+including its `Invoice` wrapper. `--select` remains available for projection.
 
 ### Void a transaction
 

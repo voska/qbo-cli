@@ -31,6 +31,7 @@ type CLI struct {
 	Create      CreateCmd    `cmd:"" help:"Create an entity from JSON."`
 	Update      UpdateCmd    `cmd:"" help:"Update an entity."`
 	Delete      DeleteCmd    `cmd:"" help:"Delete an entity by ID."`
+	Send        SendCmd      `cmd:"" help:"Email an invoice to a third party. --to replaces its BillEmail.Address. Sends are never retried."`
 	Void        VoidCmd      `cmd:"" help:"Void a transaction by ID, preserving its audit trail."`
 	List        ListCmd      `cmd:"" help:"List entities (sugar for query)."`
 	Batch       BatchCmd     `cmd:"" help:"Run batch operations."`
