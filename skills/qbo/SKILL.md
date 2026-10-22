@@ -95,7 +95,7 @@ QBO wraps all responses. Know the shapes:
 - **`list`/`query`** returns `{"QueryResponse": {"Invoice": [...], "startPosition": 1, ...}}`.
   Use `--results-only` to unwrap to just the array.
 - **`get`** returns `{"Invoice": {...}}`. Use jq to drill in: `qbo get invoice 123 --json | jq '.Invoice'`
-- **`create`/`update`/`void`** returns the same wrapper as `get`.
+- **`create`/`update`/`void`/`send`** returns the same wrapper as `get`.
 - **`report`** returns `{"Header": {...}, "Rows": {...}}`.
 
 Always use `--json` when parsing output programmatically.
@@ -182,6 +182,39 @@ expected value and fails without posting on a mismatch. Already-void records
 no POST. Dry runs make no API calls; a pinned token includes the exact body.
 Use `--force` with `--no-input`; otherwise the command prompts for confirmation.
 
+## Sending Invoices
+
+`qbo send invoice <id> [--to <email>]` emails a third party. Without `--to`,
+QuickBooks uses the invoice's stored `BillEmail`. With `--to`, QuickBooks sends
+to that address **and replaces the invoice's `BillEmail.Address`**. Only invoices
+are supported; use the numeric `Id`, not the document number. Invoice Cc/Bcc
+settings still apply; `--to` replaces only the main billing email.
+
+```bash
+qbo send invoice 145 --dry-run
+qbo send invoice 145 --to 'a+b@example.com' --dry-run
+qbo send invoice 145 --force --no-input --sandbox --json | jq '.Invoice'
+```
+
+Dry runs print the POST and recipient to stderr with no authentication or HTTP.
+The command prompts unless `--force` is set. Noninteractive stdin and
+`--no-input` both require `--force`.
+
+**Never automatically retry a send.** Each invocation makes at most one send
+POST, without backoff or redirects. A 429, 5xx, timeout, transport failure, or
+unverified response exits **1**, never the retryable codes 7 or 8. Read
+`EmailStatus` and `DeliveryInfo` before deciding to send again:
+
+```bash
+qbo get invoice 145 --json | jq '.Invoice | {EmailStatus, DeliveryInfo}'
+```
+
+401, 403 and 404 retain exit codes 4, 6 and 5. JSON preserves the complete QBO
+response, including its `Invoice` wrapper. Human/plain output shows `Id`,
+`DocNumber`, `EmailStatus`, `BillEmail.Address` and `DeliveryInfo.DeliveryTime`.
+A successful send response is QuickBooks' send record, not proof of arrival in
+the recipient's inbox. Do not send production test emails.
+
 ## Recurring Transactions
 
 Templates that auto-post transactions on a schedule (e.g. monthly amortization).
@@ -201,6 +234,7 @@ qbo delete recurringtransaction <id>   # reads + echoes the full object for you
 qbo schema --json             # Full CLI tree, all entities, all flags
 qbo schema get --json         # Schema for a specific command
 qbo schema void --json        # Void arguments and --sync-token flag
+qbo schema send --json        # Invoice sending and --to flag (never auto-retry)
 qbo exit-codes --json         # Exit codes as JSON
 ```
 

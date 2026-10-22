@@ -89,6 +89,14 @@ func fullSchema(version string) map[string]any {
 				"args": []string{"entity", "id"},
 			},
 			{
+				"name":      "send",
+				"help":      "Email an invoice to a third party. --to replaces its BillEmail.Address. Sends are never retried.",
+				"args":      []string{"entity", "id"},
+				"flags":     []string{"--to"},
+				"entities":  []string{"invoice"},
+				"retryable": false,
+			},
+			{
 				"name":  "void",
 				"help":  "Void a transaction by ID, preserving its audit trail",
 				"args":  []string{"entity", "id"},

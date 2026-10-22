@@ -7,6 +7,7 @@ require (
 	github.com/alecthomas/kong v1.15.0
 	github.com/muesli/termenv v0.16.0
 	golang.org/x/oauth2 v0.36.0
+	golang.org/x/term v0.44.0
 )
 
 require (
@@ -21,5 +22,4 @@ require (
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	golang.org/x/sys v0.46.0 // indirect
-	golang.org/x/term v0.44.0 // indirect
 )

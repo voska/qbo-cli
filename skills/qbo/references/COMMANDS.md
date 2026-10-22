@@ -35,6 +35,7 @@ All QBO responses are wrapped. Use `--json` for parsing.
 | `create`, `update` | `{"Entity": {...}}` | Same as `get` |
 | `delete` | `{"Entity": {"Id": "...", "status": "Deleted"}}` | |
 | `void` | `{"Entity": {...}}` | `TotalAmt` is zero; `PrivateNote` starts with `Voided` |
+| `send` | `{"Invoice": {...}}` | Full returned Invoice; never automatically retry a send |
 | `report` | `{"Header": {...}, "Rows": {...}}` | Nested row structure |
 
 ## Commands
@@ -144,6 +145,55 @@ qbo void invoice 145 --force --no-input --sandbox --json | jq '.Invoice'
 a pin, it says the SyncToken will be read at execution. With `--sync-token`, it
 prints the exact POST body. Normal output preserves the QBO response wrapper.
 
+### send
+
+```bash
+qbo send invoice <id> [--to <email>] [--force]
+```
+
+Emails a third party. Without `--to`, QuickBooks uses the invoice's stored
+`BillEmail`. With `--to`, it sends to that address **and replaces the invoice's
+`BillEmail.Address`**. The recipient must be a single email address without a
+display name. Only invoices are supported; `<id>` is the numeric invoice Id,
+not its document number. Invoice Cc/Bcc settings still apply; `--to` replaces
+only the main billing email. Invalid arguments or other entities exit 2 before
+authentication or HTTP.
+
+The command prompts for confirmation unless `--force` is set. Noninteractive
+stdin and `--no-input` without `--force` exit 2 without authentication or HTTP.
+`--dry-run` prints the POST path and recipient to stderr with no authentication
+or HTTP, even without `--force`.
+
+```bash
+qbo send invoice 145 --dry-run
+qbo send invoice 145 --to 'a+b@example.com' --dry-run
+qbo send invoice 145 --force --no-input --sandbox --json | jq '.Invoice'
+```
+
+The send request is `POST /v3/company/{realmId}/invoice/{id}/send`, with an empty
+body, `Content-Type: application/octet-stream`, and `Accept: application/json`.
+`--to` adds the URL-encoded `sendTo` query parameter.
+
+**Never automatically retry a send.** There is at most one send POST per
+invocation, with no backoff or redirects. 429, 5xx, timeout, transport failure,
+and unverified responses exit **1**, never 7 or 8. These outcomes may have sent
+an email. Read `EmailStatus` and `DeliveryInfo` before deciding to send again:
+
+```bash
+qbo get invoice 145 --json | jq '.Invoice | {EmailStatus, DeliveryInfo}'
+```
+
+401, 403 and 404 retain exit codes 4, 6 and 5. A verified response must show the
+requested invoice Id, `EmailStatus: EmailSent`, a nonempty billing email and
+`DeliveryInfo.DeliveryTime`; with `--to`, the returned billing email must match.
+This is QuickBooks' send record, not proof of inbox delivery.
+
+JSON preserves the complete returned QBO response with its `Invoice` wrapper.
+Human/plain output defaults to `Id`, `DocNumber`, `EmailStatus`,
+`BillEmail.Address` and `DeliveryInfo.DeliveryTime`. Explicit `--select` projects
+from the complete wrapper in every output mode. Do not send production test
+emails.
+
 ### query
 
 ```bash
@@ -221,6 +271,7 @@ transaction Id, not its document number. Defaults to `<entity>-<id>.pdf`.
 qbo schema --json             # Full CLI tree with all entities
 qbo schema get --json         # Schema for a specific command
 qbo schema void --json        # Void arguments and --sync-token flag
+qbo schema send --json        # Invoice sending and --to flag (never auto-retry)
 ```
 
 ### exit-codes
